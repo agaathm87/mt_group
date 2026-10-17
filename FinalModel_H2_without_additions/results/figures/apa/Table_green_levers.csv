@@ -1,0 +1,14 @@
+scenario,lever,Electrolysis share 2050 (%),Electrolysers 2050 (GW_el),of which on desalinated water (GW_el),Full-load hours 2050,System cost vs central (bn €),CO2 vs central (Mt),Gas imports vs central (TWh),"Production subsidy paid (bn €, present value)",Fresh water for H2 2050 (Mm3)
+Base,none (central),53.56,7.07,0.0,4691.62,0.0,0.0,0.0,0.0,32.22
+Base,production subsidy €1/kg,84.59,7.07,0.0,7409.93,1.7,2.93,-12.51,7.8,29.8
+Base,production subsidy €2/kg,95.84,7.61,0.0,8395.72,17.59,-10.86,-528.99,35.41,27.95
+Base,mandate: 60% electrolysis from 2040,63.66,7.44,0.0,5576.41,10.66,-32.54,-347.9,0.0,28.45
+Medium,none (central),25.02,3.53,0.0,4383.2,0.0,0.0,0.0,0.0,34.45
+Medium,desalinated water (+€0.03/kg),53.38,7.07,3.53,4675.71,-2.35,-47.29,-216.07,0.0,25.43
+Medium,production subsidy €1/kg,40.79,3.53,0.0,7147.01,0.8,-0.36,-4.28,3.76,33.22
+Medium,production subsidy €2/kg,47.57,3.53,0.0,8334.97,1.54,-0.33,-3.28,8.78,32.69
+Medium,mandate + desalinated water,63.52,7.44,5.23,5564.66,8.53,-80.09,-567.02,0.0,18.41
+Scarce,none (central),0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,36.4
+Scarce,desalinated water (+€0.03/kg),53.38,7.07,7.07,4675.67,-4.97,-92.73,-450.84,0.0,16.97
+Scarce,desalinated water at 10x (+€0.30/kg),52.32,7.07,7.07,4582.9,-3.65,-86.93,-438.17,0.0,17.36
+Scarce,mandate + desalinated water,63.17,7.44,7.44,5533.62,5.91,-125.16,-799.47,0.0,10.43
