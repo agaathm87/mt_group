@@ -1,7 +1,7 @@
 """Build and solve the PyPSA energy model.
 
-Hydrogen extension (group report, Modelling for Transitions)
------------------------------------------------------------
+Hydrogen extension based on the final course model
+---------------------------------------------------
 Lines marked with ``# [H2]`` were added or changed for the hydrogen study.
 Everything else is the P06 course model. Without the new keyword arguments,
 ``model_run`` behaves exactly as before (Gurobi, no scenario constraint).

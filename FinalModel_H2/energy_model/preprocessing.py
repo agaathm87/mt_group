@@ -77,11 +77,11 @@ def preprocess_demand(db_dir, years, t_res):
     dmd_prj = pd.DataFrame(index=demands.index, columns=years)
     for i in demands.index:
         dmd_prj.loc[i,:] = [
-                           project_demand(y,  
+                            project_demand(y,  
                             driver=demands.loc[i,['Driver']].values[0],
                             start_value=demands.loc[i,['Start_value']].values[0],
                             dc=demands.loc[i,['Exponent']].values[0]) for y in years 
-                       ]
+                        ]
     demand_profiles_prj = propagate_profiles(demand_profiles,model_years=years,t_res=t_res)
     for y in years:
         for i in demands.index:
@@ -97,7 +97,10 @@ def preprocess_demand(db_dir, years, t_res):
 
 def preprocess_supply(db_dir, years, t_res):
     """Prepare resources, resource parameters, and renewable profiles."""
-
+    # From main_PSEUDO.py:
+    # - import resources, their parameters, and renewable profiles;
+    # - interpolate/extrapolate resource parameters;
+    # - propagate renewable profiles to all periods.
     # 1. From database/supply import resources, their parameters and the renewable profiles
     resources = pd.read_excel(f"{db_dir}//supply.xlsx", sheet_name='resources')
     resources_pars = pd.read_excel(f"{db_dir}//supply.xlsx", sheet_name='resources_parameters')
@@ -108,13 +111,16 @@ def preprocess_supply(db_dir, years, t_res):
 
     # 3. Propagate renewable temporal profiles to all periods
     ren_profiles = propagate_profiles(ren_profiles, model_years=years, t_res=t_res)
-
     return resources, resources_pars, ren_profiles
 
 
 
 def preprocess_technologies(db_dir, years, passenger_cars_cf):
     """Prepare static and dynamic technology parameters."""
+    # From main_PSEUDO.py:
+    # - read static and dynamic technology parameters;
+    # - interpolate/extrapolate dynamic parameters;
+    # - convert units to those expected by PyPSA.
 
     # 1. From database/technologies read all static and dynamic technology parameters
     techs_s = pd.read_excel(f"{db_dir}//technologies.xlsx", sheet_name='static_parameters', index_col=[0,1])
@@ -137,9 +143,8 @@ def preprocess_technologies(db_dir, years, passenger_cars_cf):
     # Transport capital costs are in €/car, and need to be converted in €/[unit of capacity].
     techs_d.loc[techs_d['Unit'].str.contains('/car'), years] *= 1e6/passenger_cars_cf
     techs_d['Unit'] = techs_d['Unit'].str.replace('/car','/Mkm/h')
-
-    # 4. Read in the user-defined capacity constraints used for model calibration.
-    #    (min/max installed capacity per technology and vintage year; see model.get_cap_constraints)
+    
+    # 4. Read in tech constraints
     cn = pd.read_excel(f"{db_dir}//technologies.xlsx", sheet_name='capacity_constraints', index_col=[0,1])
     cn = cn.sort_index()
 

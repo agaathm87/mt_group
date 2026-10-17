@@ -1,4 +1,4 @@
-"""Hydrogen extension of the FINAL course model (group report, Modelling for Transitions).
+"""Hydrogen extension of the final course model.
 
 The set-up agreed with Francesco (meeting of 14 October):
 

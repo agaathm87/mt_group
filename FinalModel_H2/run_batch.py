@@ -88,9 +88,6 @@ RUNS = {
     'S3_desal_mandate': ('S3', dict(desal=True, green_mandate=MANDATE)),
 }
 # The 60% mandate in Medium (S2_mandate) has no solution: water allows electrolysers for at most 50% of the demand.
-INFEASIBLE = {'S2_mandate': 'the water of Medium allows electrolysis for at most 50% of the hydrogen'}
-
-
 def _reference(settings, solver):
     """Replace 'from:<run>' by the electrolyser capacity per vintage of that run (solving it first if needed)."""
     for key in ('electrolyser_reference', 'electrolyser_plant_reference'):
@@ -129,5 +126,5 @@ def run(name, solver=SOLVER, rerun=False, t_res=T_RES):
 if __name__ == '__main__':
     solver = SOLVER
     print(f'Model: {len(RUNS)} runs')
-    for name in (sys.argv[1:] or [r for r in RUNS if r not in INFEASIBLE]):     # infeasible ones only when named
+    for name in (sys.argv[1:] or list(RUNS)):
         run(name, solver)
