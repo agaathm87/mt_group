@@ -48,6 +48,27 @@ RUNS = {
     'S1': ('S1', {}),
     'S2': ('S2', ref()),
     'S3': ('S3', {}),
+    # ---- (2a) cheaper electrolysers: a subsidy of 20% (Francesco's example) or 40%, and the low cost path ----
+    'S1_sub20': ('S1', dict(electrolyser_subsidy=0.2)), 'S2_sub20': ('S2', dict(ref(), electrolyser_subsidy=0.2)),
+    'S1_sub40': ('S1', dict(electrolyser_subsidy=0.4)), 'S2_sub40': ('S2', dict(ref(), electrolyser_subsidy=0.4)),
+    'S1_capexlow': ('S1', dict(electrolyser_capex='low')), 'S2_capexlow': ('S2', dict(ref(), electrolyser_capex='low')),
+    # ---- (2b) CO2 price paths: low (170 EUR/t in 2050) and high (500 EUR/t) ----
+    'S1_co2low': ('S1', dict(co2_price='low')), 'S2_co2low': ('S2', dict(ref(), co2_price='low')),
+    'S3_co2low': ('S3', dict(co2_price='low')),
+    'S1_co2high': ('S1', dict(co2_price='high')), 'S2_co2high': ('S2', dict(ref(), co2_price='high')),
+    'S3_co2high': ('S3', dict(co2_price='high')),
+    # ---- (3a, 3c) batteries where electrolysis is limited: half the cost, 8 hours instead of 4 ----
+    'S2_battery_cheap': ('S2', dict(ref(), battery_cost_factor=0.5)),
+    'S2_battery_8h': ('S2', dict(ref(), battery_max_hours=8)),
+    # ---- Scarce at 10% instead of 0% (Francesco: "zero or ten percent") ----
+    'S3_10pct': ('S3', dict(ref(), electrolyser_cap_share=0.1)),
+    # ---- the over-dimensioned plant: the electrolysers of Base are built, then water allows only Medium's water ----
+    #   (without additions: the plant of S1 at 50% of its output; with additions: the plant of S1 of that package,
+    #   whose hourly output is capped at the same MW as Medium)
+    'S2_oversized': ('S2', dict(ref(), electrolyser_limit_on='output', **(
+        dict(electrolyser_plant_reference='from:S1') if ADDITIONS else {}))),
+    # ---- the decision on what the hydrogen is for: fuel for high-temperature heat instead of feedstock ----
+    'S1_htp_fuel': ('S1', dict(h2_demand_use='htp_fuel')),
     # ---- optional hydrogen storage ----
     'S1_storage': ('S1', dict(h2_storage=True)),
     'S2_storage': ('S2', dict(ref(), h2_storage=True)),
