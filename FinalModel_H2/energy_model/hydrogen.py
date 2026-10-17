@@ -40,7 +40,10 @@ import numpy as np
 import pandas as pd
 import xarray as xr
 
-from .package import ADDITIONS, SET_NAME, STORAGE
+# Set this switch to False to exclude hydrogen storage from rebuilt databases and
+# from the default scenario settings. Individual runs can still override it with
+# h2_storage=True or h2_storage=False.
+STORAGE = True
 
 # Names of the hydrogen technologies in the database (technologies.xlsx)
 ELECTROLYSIS_GRID = ['Electrolyser']                   # green: grid electricity
@@ -191,9 +194,9 @@ DEFAULTS = dict(
                                    #   it run at no more than electrolyser_cap_share of its capacity in any hour (the
                                    #   "over-dimensioned plant" story of Francesco: build for abundant water, then a drought)
     electrolyser_plant_reference=None,  # with 'output': the plant to build ({technology: {year: MW of H2}}, e.g. of
-                                   #   the Base run of this package); the water then caps the hourly output of all
+                                   #   the Base run); the water then caps the hourly output of all
                                    #   electrolysers together at share x electrolyser_reference (the same water in MW)
-    # --- additions (group, 15 Oct): on in every run of the package WITH additions, absent in the package without ---
+    # --- optional hydrogen storage ---
     h2_storage=STORAGE,            # H2 storage in salt caverns (a Store on the hydrogen bus)
     h2_storage_cap='central',      # MWh of H2 storage that can exist (key of H2_STORAGE_CAPS or {year: MWh}); None = no cap
     h2_storage_cost_factor=1.0,    # (2c) multiplier on H2 storage CAPEX and FOM
@@ -243,9 +246,9 @@ def make_scenario(base='S1', preset=None, **settings):
     """Return the settings for one run, e.g. make_scenario('S3', co2_price='high').
 
     base is 'S1' (Base), 'S2' (Medium), 'S3' (Scarce) or None (no limit, the same as S1).
-    S2 needs the electrolyser capacity of the central S1 run without additions (the same water in MW in both
-    packages):  make_scenario('S2', electrolyser_reference=electrolyser_reference(n_S1))
-    Hydrogen storage and the green levers are optional settings in this package.
+    S2 needs the electrolyser capacity of the central S1 run:
+    make_scenario('S2', electrolyser_reference=electrolyser_reference(n_S1))
+    Hydrogen storage and the green levers are optional settings.
     The defaults are the central Dutch values used to build input_databases/h2_nl.
     preset: None or 'nl' (the same; 'nl' is accepted so older scripts keep working).
     """

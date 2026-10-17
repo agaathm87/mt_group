@@ -1,6 +1,6 @@
 # Final course model with hydrogen
 
-This package contains the final course model for the Netherlands with the
+This folder contains the final course model for the Netherlands with the
 hydrogen extension. Hydrogen is represented as a fixed industrial demand of
 1.3 Mt per year, served by grey hydrogen, blue hydrogen, and grid electrolysis.
 The 2020 reformers are represented as existing capacity.
@@ -39,8 +39,10 @@ The optional experiments retained in this package are:
 - `h2_storage`: hydrogen storage in salt caverns;
 - `h2_storage_cost_factor`: storage-cost sensitivity.
 
-The core model keeps storage off unless a run enables it. The selected runs are
-defined in `run_batch.py`.
+Storage is controlled by the `STORAGE` switch near the top of
+`energy_model/hydrogen.py`. Individual runs can override it with
+`h2_storage=True` or `h2_storage=False`. The selected runs are defined in
+`run_batch.py`.
 
 ## Main files
 

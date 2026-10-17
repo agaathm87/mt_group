@@ -15,10 +15,10 @@ The set-up (meeting with Francesco, 14 October):
         Electrolyser   green  bus0 Electricity  bus1 Hydrogen
     plus 'SMR - existing', the reformers that exist in 2020 (the course's "- existing" convention: CAPEX 0,
     base year only), so the 2020 hydrogen is not built from scratch.
-  * H2 storage (group, 15 October), retained as an optional addition:
+  * H2 storage (group, 15 October), retained as an optional model feature:
         H2 storage                 salt caverns, a Store on the hydrogen bus                (h2_storage)
-    Dedicated renewable and nuclear routes are not included in this package.
-  * The green lever 'Electrolyser - seawater' (desalinated water, outside the water limit) is in both packages, off
+    Dedicated renewable and nuclear routes are not included.
+  * The green lever 'Electrolyser - seawater' (desalinated water, outside the water limit) is off
     unless a run switches it on (desal=True).
   * Not in the model: hydrogen as a secondary resource, the hydrogen furnace (option A) and hydrogen imports.
   * Water is not a resource in the model. The scenarios limit the electrolyser capacity instead (capacity
@@ -43,7 +43,7 @@ Danish Energy Agency technology catalogues and the IEA. Per kW of H2 output = pe
 from pathlib import Path
 import pandas as pd
 
-from energy_model.package import ADDITIONS, SET_NAME, STORAGE
+from energy_model.hydrogen import STORAGE
 
 HERE = Path(__file__).parent
 SRC = HERE / 'input_databases' / 'default'      # final course model (calibrated)
@@ -55,7 +55,7 @@ MWH_PER_T = 33.33           # lower heating value of hydrogen
 H2_DEMAND_MWH = H2_DEMAND_MT * 1e6 * MWH_PER_T
 
 # ============================================================
-# HYDROGEN EXTENSION (in both packages)
+# HYDROGEN EXTENSION
 # ============================================================
 
 # Static parameters: (Technology, Parameter, Description, Efficiency_link, Value)
@@ -145,7 +145,7 @@ CAPACITY = [
 ]
 
 # ============================================================
-# ADDITIONS of 15 October (only in the package with additions: energy_model/package.py)
+# Optional hydrogen storage
 # ============================================================
 # H2 storage in salt caverns: a Store on the hydrogen bus. CAPEX/FOM per kWh of storage capacity.
 STATIC_OPTIONS = [
@@ -332,7 +332,7 @@ def main():
 
     s_nl, d_nl, c_nl, res_nl, par_nl = nl_updates(s, d, c, res, par)      # the real (Dutch) numbers
     write_database(DST_NL, s_nl, d_nl, c_nl, dem, drv, prof, res_nl, par_nl, ren)
-    print(f'Package {SET_NAME}. Hydrogen demand: {H2_DEMAND_MWH:,.0f} MWh/yr = {H2_DEMAND_MWH / 8760:,.0f} MW flat')
+    print(f'Model rebuilt. Hydrogen demand: {H2_DEMAND_MWH:,.0f} MWh/yr = {H2_DEMAND_MWH / 8760:,.0f} MW flat')
 
 
 if __name__ == '__main__':
