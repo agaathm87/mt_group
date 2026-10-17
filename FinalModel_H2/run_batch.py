@@ -49,6 +49,9 @@ RUNS = {
     'S1_sub20': ('S1', dict(electrolyser_subsidy=0.2)), 'S2_sub20': ('S2', dict(ref(), electrolyser_subsidy=0.2)),
     'S1_sub40': ('S1', dict(electrolyser_subsidy=0.4)), 'S2_sub40': ('S2', dict(ref(), electrolyser_subsidy=0.4)),
     'S1_capexlow': ('S1', dict(electrolyser_capex='low')), 'S2_capexlow': ('S2', dict(ref(), electrolyser_capex='low')),
+    # ---- infrastructure subsidy: 20% or 40% of electrolyser infrastructure CAPEX ----
+    'S1_infra20': ('S1', dict(infrastructure_subsidy=0.2)), 'S2_infra20': ('S2', dict(ref(), infrastructure_subsidy=0.2)),
+    'S1_infra40': ('S1', dict(infrastructure_subsidy=0.4)), 'S2_infra40': ('S2', dict(ref(), infrastructure_subsidy=0.4)),
     # ---- (2b) CO2 price paths: low (170 EUR/t in 2050) and high (500 EUR/t) ----
     'S1_co2low': ('S1', dict(co2_price='low')), 'S2_co2low': ('S2', dict(ref(), co2_price='low')),
     'S3_co2low': ('S3', dict(co2_price='low')),

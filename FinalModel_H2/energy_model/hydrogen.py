@@ -217,6 +217,7 @@ DEFAULTS = dict(
     h2_demand_mt=None,             # key of H2_DEMAND or {year: Mt}; None = database (1.3 Mt every period)
     # --- sensitivities: cost variations within the scenarios ---
     electrolyser_subsidy=0.0,      # (2a) share of electrolyser CAPEX paid by subsidy, 0-0.8 (OWE)
+    infrastructure_subsidy=0.0,    # share of electrolyser infrastructure CAPEX paid by subsidy, 0-0.8
     electrolyser_capex=None,       # (2a) 'low'/'central'/'high' or {year: €/kW_e}; None = database
     co2_price='central',           # (2b) key of CO2_PRICES, number, {year: price}, or None (= database)
     co2_price_scope='all',         # 'all': every emission pays (ETS-like); 'h2': only the SMR routes pay
@@ -485,14 +486,20 @@ def apply_scenario_inputs(techs_s, techs_d, resources_pars, cn, scen, years):
                 if _has(techs_d, t, 'FOM'):   # FOM is a share of CAPEX, keep that share
                     techs_d.loc[(t, 'FOM'), years] = techs_d.loc[(t, 'FOM'), years].values * new / old
     sub = _per_year(scen['electrolyser_subsidy'], years)
+    infrastructure_sub = _per_year(scen['infrastructure_subsidy'], years)
+    total_sub = 1 - (1 - sub) * (1 - infrastructure_sub)
     scen['_subsidy_eur_per_mw_h2'] = {}          # kept on n.meta, used by h2_results.subsidy_cost()
+    scen['_infrastructure_subsidy_eur_per_mw_h2'] = {}
     scen['_capex_eur_per_mw_h2'] = {}            # electrolyser CAPEX before the subsidy (investment outputs)
     for t in ELECTROLYSIS:
         if _has(techs_d, t, 'CAPEX'):
             capex = techs_d.loc[(t, 'CAPEX'), years].values.astype(float)
             scen['_capex_eur_per_mw_h2'][t] = {str(y): float(v) for y, v in zip(years, capex)}
-            scen['_subsidy_eur_per_mw_h2'][t] = {str(y): float(v) for y, v in zip(years, capex * sub.values)}
-            techs_d.loc[(t, 'CAPEX'), years] = capex * (1 - sub.values)
+            scen['_subsidy_eur_per_mw_h2'][t] = {str(y): float(v) for y, v in zip(years, capex * total_sub.values)}
+            scen['_infrastructure_subsidy_eur_per_mw_h2'][t] = {
+                str(y): float(v) for y, v in zip(years, capex * infrastructure_sub.values)
+            }
+            techs_d.loc[(t, 'CAPEX'), years] = capex * (1 - total_sub.values)
 
     # Green levers: the cost of desalinated water and an operating subsidy per kg, both as variable cost (VOM, € per
     # MWh of electricity INPUT = € per kg x kg per MWh of hydrogen x efficiency)

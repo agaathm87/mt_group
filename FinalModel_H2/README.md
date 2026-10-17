@@ -35,6 +35,7 @@ The optional experiments retained in this package are:
 
 - `desal`: electrolysis using alternative water outside the capacity limit;
 - `h2_production_subsidy`: an operating subsidy per kilogram of hydrogen;
+- `infrastructure_subsidy`: a 20% or 40% capital subsidy for electrolyser infrastructure;
 - `green_mandate`: a minimum electrolytic-hydrogen share;
 - `h2_storage`: hydrogen storage in salt caverns;
 - `h2_storage_cost_factor`: storage-cost sensitivity.
