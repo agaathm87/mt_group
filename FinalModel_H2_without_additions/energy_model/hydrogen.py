@@ -15,13 +15,8 @@ The set-up agreed with Francesco (meeting of 14 October):
       S2 Medium     medium water scarcity: at most 50% of the electrolyser capacity that S1 builds (per vintage)
       S3 Scarce     high water scarcity: no electrolysers (0%)
   The rest of the hydrogen demand is met by gas-based hydrogen (grey or blue, whichever is cheaper).
-* ADDITIONS (group, 15 Oct): h2_storage (salt caverns), pure_green (dedicated offshore wind + solar -> electrolyser,
-  no grid) and pink (dedicated nuclear -> electrolyser; "pink hydrogen" in the colour scheme of Broadleaf, shown by
-  van der Zwaan, 2026). There are two packages (energy_model/package.py): WITHOUT additions (they do not exist) and
-  WITH additions (on in every run by default). The water limit applies to every electrolyser, whatever its power
-  source, and it is the same in MW in both packages.
-* Within each scenario, cost variations are sensitivities: electrolyser CAPEX or a subsidy (2a), the CO2 price (2b),
-  the H2 storage cost (2c, with additions), batteries (3a-c).
+* H2 storage (group, 15 Oct): optional salt-cavern storage on the hydrogen bus.
+* Within each scenario, green levers and hydrogen-storage cost are optional sensitivities.
 * GREEN LEVERS within the water scenarios (16 Oct), off by default: desal (electrolysers on desalinated seawater,
   outside the water limit, at 0.01-0.03 €/kg extra), h2_production_subsidy (€/kg of electrolytic hydrogen) and
   green_mandate (a minimum share of electrolytic hydrogen per period, RED III-type).
@@ -29,7 +24,7 @@ The set-up agreed with Francesco (meeting of 14 October):
 This module holds:
 * SCENARIOS, SHORT_NAMES        the three scenarios
 * presets                       CO2_PRICES (ETS1), CO2_PRICES_ETS2 (household gas and petrol cars, from 2028),
-                                GAS_PRICES, ELY_CAPEX, ... (real Dutch data, see the research report);
+                                GAS_PRICES, ELY_CAPEX, ... (Dutch input data and cited sources);
                                 the central values are the defaults, the other values are sensitivities
 * make_scenario()               one run = a scenario plus any sensitivities and data settings
 * electrolyser_reference()      the electrolyser capacity per technology and vintage of a solved run (the S1 reference)
@@ -45,23 +40,17 @@ import numpy as np
 import pandas as pd
 import xarray as xr
 
-from .package import ADDITIONS, SET_NAME
+from .package import ADDITIONS, SET_NAME, STORAGE
 
 # Names of the hydrogen technologies in the database (technologies.xlsx)
 ELECTROLYSIS_GRID = ['Electrolyser']                   # green: grid electricity
-ELECTROLYSIS_GREEN = ['Electrolyser - dedicated']      # pure green: dedicated wind + solar (option)
-ELECTROLYSIS_PINK = ['Electrolyser - nuclear']         # pink: dedicated nuclear (option)
 ELECTROLYSIS_SEAWATER = ['Electrolyser - seawater']    # green on desalinated seawater: OUTSIDE the water limit (lever)
-ELECTROLYSIS = ELECTROLYSIS_GRID + ELECTROLYSIS_GREEN + ELECTROLYSIS_PINK + ELECTROLYSIS_SEAWATER   # all electrolysis
+ELECTROLYSIS = ELECTROLYSIS_GRID + ELECTROLYSIS_SEAWATER
 GREY = ['SMR', 'SMR - existing']                       # grey (new and the 2020 stock)
 BLUE = ['SMR CCS']                                     # blue
 H2_PRODUCTION = ELECTROLYSIS + GREY + BLUE
 H2_STORAGE = ['H2 storage']                            # salt caverns (option)
-DEDICATED_RES = ['Solar PV - dedicated', 'Wind turbine - offshore - dedicated']
-DEDICATED_RES_CARRIERS = ['Solar - dedicated', 'Wind offshore - dedicated']
-DEDICATED_NUCLEAR = ['Nuclear plant - dedicated']
-OPTION_TECHS = {'h2_storage': H2_STORAGE, 'pure_green': DEDICATED_RES + ELECTROLYSIS_GREEN,
-                'pink': DEDICATED_NUCLEAR + ELECTROLYSIS_PINK, 'desal': ELECTROLYSIS_SEAWATER}
+OPTION_TECHS = {'h2_storage': H2_STORAGE, 'desal': ELECTROLYSIS_SEAWATER}
 KG_PER_MWH_H2 = 1000 / 33.33                           # kg of hydrogen per MWh (LHV)
 BATTERY = ['Battery']
 H2_BUS = 'Hydrogen'                                    # the demand bus of 'industrial_h2'
@@ -83,7 +72,7 @@ SHORT_NAMES = {'S1': 'Base', 'S2': 'Medium', 'S3': 'Scarce'}     # short names f
 REFERENCE_SCENARIO = 'S1'                                         # the cost-optimal run the caps refer to
 
 # --------------------------------------------------------------------------
-# Presets from the research report "Dutch hydrogen model input data" (October 2026).
+# Presets based on Dutch input data and cited sources (October 2026).
 # All money values in 2024 euros (the report's convention). Price bases are converted with the Dutch HICP
 # (Eurostat HICP, annual averages as published by CBS): 2021 +2.8%, 2022 +11.6%, 2023 +4.1%, 2024 +3.2%, 2025 +3.0%.
 #   nominal 2020 -> €2024: x 1.2325          €2025 -> €2024: / 1.030
@@ -105,7 +94,7 @@ CO2_PRICES = {
 # the petrol cars (ETS2_TECHS). ETS2 starts with the emissions of 2028, so 2020 = 0 (no EU carbon price on household
 # gas and petrol). PBL (2026c, p. 17; 2025 prices): low 57 €/t = the price-stability trigger, kept flat ("loopt niet
 # op in de tijd"); middle 86 in 2030 (futures price Dec-2028 of 71, +10%/yr); high 135 in 2030, +10%/yr.
-# 2040 = 2030 x 1.1^10 for middle and high (223, 350). 2050: converges with ETS1 (research report).
+# 2040 = 2030 x 1.1^10 for middle and high (223, 350). 2050: converges with ETS1.
 # Stress = the ETS1 stress values from 2040. Converted to €2024 (/1.030). Industry, power and hydrogen stay in ETS1.
 CO2_PRICES_ETS2 = {
     'zero':    {2020: 0, 2030: 0,   2040: 0,   2050: 0},
@@ -205,17 +194,15 @@ DEFAULTS = dict(
                                    #   the Base run of this package); the water then caps the hourly output of all
                                    #   electrolysers together at share x electrolyser_reference (the same water in MW)
     # --- additions (group, 15 Oct): on in every run of the package WITH additions, absent in the package without ---
-    h2_storage=ADDITIONS,          # H2 storage in salt caverns (a Store on the hydrogen bus)
+    h2_storage=STORAGE,            # H2 storage in salt caverns (a Store on the hydrogen bus)
     h2_storage_cap='central',      # MWh of H2 storage that can exist (key of H2_STORAGE_CAPS or {year: MWh}); None = no cap
     h2_storage_cost_factor=1.0,    # (2c) multiplier on H2 storage CAPEX and FOM
-    pure_green=ADDITIONS,          # pure green route: dedicated offshore wind + solar -> electrolyser (no grid)
-    pink=ADDITIONS,                # pink hydrogen: dedicated nuclear plant -> electrolyser
     grid_electrolysis=True,        # False = no grid electrolyser: green hydrogen only from the pure green route
                                    #   (a strict reading of the EU rules for renewable hydrogen, RFNBO)
     # --- green levers within the water scenarios (16 Oct) ---
     desal=False,                   # alternative water: an electrolyser on desalinated seawater (or treated waste
                                    #   water), outside the verdringingsreeks, so NOT limited by the water scenario
-    desal_cost_eur_per_kg=0.03,    # levelised cost of that water per kg H2 (research report: 0.01-0.03 €/kg)
+    desal_cost_eur_per_kg=0.03,    # levelised cost of alternative water per kg H2
     h2_production_subsidy=0.0,     # €/kg of hydrogen from electrolysis (all electrolysers): an operating subsidy,
                                    #   CfD / H2Global / SDE++-type; a transfer, added back in the economic cost
     green_mandate=None,            # {year: minimum share of the hydrogen made by electrolysis}, e.g. {2040: 0.6,
@@ -258,9 +245,8 @@ def make_scenario(base='S1', preset=None, **settings):
     base is 'S1' (Base), 'S2' (Medium), 'S3' (Scarce) or None (no limit, the same as S1).
     S2 needs the electrolyser capacity of the central S1 run without additions (the same water in MW in both
     packages):  make_scenario('S2', electrolyser_reference=electrolyser_reference(n_S1))
-    Additions: on by default in the package with additions; switch one off with e.g. make_scenario('S1', pink=False).
-    In the package without additions they do not exist.
-    The defaults are the central real (Dutch) values of the research report, for input_databases/h2_nl.
+    Hydrogen storage and the green levers are optional settings in this package.
+    The defaults are the central Dutch values used to build input_databases/h2_nl.
     preset: None or 'nl' (the same; 'nl' is accepted so older scripts keep working).
     """
     scen = dict(DEFAULTS)
@@ -274,11 +260,6 @@ def make_scenario(base='S1', preset=None, **settings):
     if unknown:
         raise KeyError(f'Unknown scenario settings: {sorted(unknown)}')
     scen.update(settings)
-    if not ADDITIONS:
-        on = [k for k in ('h2_storage', 'pure_green', 'pink') if scen.get(k)]
-        if on:
-            raise ValueError(f'{on}: this is the package {SET_NAME}; hydrogen storage, the pure green route and pink '
-                             'hydrogen are in the package with additions (energy_model/package.py).')
     if scen['label'] is None:
         scen['label'] = base or 'no limit'
     return scen
@@ -349,10 +330,9 @@ def _per_tech(ref):
 
 
 def electrolyser_techs(scen):
-    """The electrolysers that exist in this run (the grid electrolyser plus any switched-on option)."""
+    """The grid electrolyser and, when enabled, the alternative-water lever."""
     return ((ELECTROLYSIS_GRID if scen.get('grid_electrolysis', True) else [])
-            + (ELECTROLYSIS_GREEN if scen.get('pure_green') else [])
-            + (ELECTROLYSIS_PINK if scen.get('pink') else []))
+            + (ELECTROLYSIS_SEAWATER if scen.get('desal') else []))
 
 
 def electrolyser_total_cap(scen, years):

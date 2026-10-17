@@ -7,7 +7,7 @@ Everything else is the P06 course model. Without the new keyword arguments,
 ``model_run`` behaves exactly as before (Gurobi, no scenario constraint).
 
 New keyword arguments of ``model_run``:
-    solver_name     'gurobi' (course default) or 'highs' (free, for testing)
+    solver_name     'gurobi'
     solver_options  dict passed to the solver; default depends on the solver
     scenario        dict with scenario settings (see hydrogen.make_scenario), or None for the
                     plain course model
@@ -113,15 +113,10 @@ def get_cap_constraints(t, years, cn):
 
 
 def default_solver_options(solver_name, results_dir):  # [H2]
-    """Solver options per solver (the Gurobi options are the original course settings)."""
-    if solver_name == 'gurobi':
-        return {"LogFile": os.path.join(results_dir, "solver_run.log"),
-                "LogToConsole": 0,
-                "TimeLimit": 43200}
-    if solver_name == 'highs':
-        return {"log_file": os.path.join(results_dir, "solver_run.log"),
-                "time_limit": 43200.0}
-    return {}
+    """Return the course Gurobi options."""
+    return {"LogFile": os.path.join(results_dir, "solver_run.log"),
+            "LogToConsole": 0,
+            "TimeLimit": 43200}
 
 # ============================================================
 # MAIN MODEL FUNCTION
@@ -148,7 +143,7 @@ def model_run(db_dir, years, t_res, passenger_cars_cf, rt, rs,
     rs
         Social discount rate.
     solver_name, solver_options          [H2]
-        Solver to use ('gurobi' as in the course, 'highs' as a free alternative).
+        Solver to use. The published model uses Gurobi.
     scenario                             [H2]
         None (plain course model) or a scenario dict from hydrogen.make_scenario().
     results_dir                          [H2]

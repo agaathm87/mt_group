@@ -2,7 +2,7 @@
 
   input_databases/h2_nl  = default (final course model, its 2020 calibration unchanged)
                            + a hydrogen DEMAND and three hydrogen technologies (set-up agreed with Francesco, 14 Oct)
-                           + the real Dutch data of the research report "Dutch hydrogen model input data" (Oct 2026)
+                           + Dutch hydrogen input data based on the group's documented assumptions (Oct 2026)
 
 The set-up (meeting with Francesco, 14 October):
   * Hydrogen is a demand, not a secondary resource. demand.xlsx gets one new demand, 'industrial_h2' on the bus
@@ -15,14 +15,9 @@ The set-up (meeting with Francesco, 14 October):
         Electrolyser   green  bus0 Electricity  bus1 Hydrogen
     plus 'SMR - existing', the reformers that exist in 2020 (the course's "- existing" convention: CAPEX 0,
     base year only), so the 2020 hydrogen is not built from scratch.
-  * ADDITIONS (group, 15 October), only in the package WITH additions (energy_model/package.py: ADDITIONS = True),
-    where they are on in every run:
+  * H2 storage (group, 15 October), retained as an optional addition:
         H2 storage                 salt caverns, a Store on the hydrogen bus                (h2_storage)
-        pure green route           dedicated offshore wind + solar -> 'Dedicated electricity' -> Electrolyser - dedicated
-                                   (no grid connection; "green" in the colour scheme)       (pure_green)
-        pink hydrogen              dedicated nuclear plant -> 'Nuclear electricity' -> Electrolyser - nuclear
-                                   ("pink" = nuclear + electrolysis; Broadleaf, in van der Zwaan, 2026)  (pink)
-    The package WITHOUT additions has none of these components in its database.
+    Dedicated renewable and nuclear routes are not included in this package.
   * The green lever 'Electrolyser - seawater' (desalinated water, outside the water limit) is in both packages, off
     unless a run switches it on (desal=True).
   * Not in the model: hydrogen as a secondary resource, the hydrogen furnace (option A) and hydrogen imports.
@@ -31,8 +26,8 @@ The set-up (meeting with Francesco, 14 October):
 
 Run:  python build_h2_database.py
 Edit the numbers in the HYDROGEN EXTENSION and DUTCH DATA sections below and run again to regenerate the database.
-The HYDROGEN EXTENSION gives the structure and first (technology-data) values; the DUTCH DATA replace them where the
-research report has real values. input_databases/default stays untouched (the course model itself).
+The HYDROGEN EXTENSION gives the structure and first values; the DUTCH DATA replace them with the selected Dutch
+input values. input_databases/default stays untouched (the course model itself).
 
 Units follow the course database:
   CAPEX, FOM  in €/kW of OUTPUT (the model multiplies by the efficiency for links)
@@ -48,7 +43,7 @@ Danish Energy Agency technology catalogues and the IEA. Per kW of H2 output = pe
 from pathlib import Path
 import pandas as pd
 
-from energy_model.package import ADDITIONS, SET_NAME
+from energy_model.package import ADDITIONS, SET_NAME, STORAGE
 
 HERE = Path(__file__).parent
 SRC = HERE / 'input_databases' / 'default'      # final course model (calibrated)
@@ -167,12 +162,7 @@ DYNAMIC_OPTIONS = [
     ('H2 storage', 'Efficiency', None, [1.0] * 4),
     ('H2 storage', 'Lifetime', 'years', [100] * 4),
 ]
-# Pure green route (dedicated wind + solar) and pink hydrogen (dedicated nuclear) are copies of course
-# technologies on their own buses (made in nl_updates); their electricity never reaches the grid.
-OPTION_RESOURCES = [
-    {'Resource': 'Dedicated electricity', 'Carrier': 'Dedicated electricity', 'Type': 'Secondary'},
-    {'Resource': 'Nuclear electricity', 'Carrier': 'Nuclear electricity', 'Type': 'Secondary'},
-]
+OPTION_RESOURCES = []
 
 # Technologies and buses of the earlier set-ups that are removed from the database
 REMOVED_TECHS = ['Industrial HTP - hydrogen']
@@ -180,7 +170,7 @@ REMOVED_RESOURCES = ['Hydrogen']
 
 
 # ============================================================
-# DUTCH DATA (input_databases/h2_nl) - central values of the research report, 2024 euros
+# DUTCH DATA (input_databases/h2_nl) - selected central values, in 2024 euros
 # Price bases converted with the Dutch HICP (Eurostat/CBS): nominal 2020 x 1.2325, €2025 / 1.030 (see hydrogen.py)
 # ============================================================
 E2020, E2025 = 1.028 * 1.116 * 1.041 * 1.032, 1 / 1.030   # -> €2024
@@ -202,7 +192,7 @@ NL_OFFSHORE_FOM = [round(47 * E2025, 1)] * 4  # €/kW/yr: PBL 2026 (€2025)
 NL_BATTERY_HOURS = 4
 NL_BATTERY_CAPEX = [round(c * E2025) for c in (800, 600, 480, 360)]  # €/kW for 4 h (200/150/120/90 €2025/kWh): BNEF,
                                                                      # Ember, NREL 2025
-NL_BATTERY_LIFETIME = 20                    # years: 15-20 for 4-h systems (NREL 2025; research report); course 25
+NL_BATTERY_LIFETIME = 20                    # years: 15-20 for 4-h systems; course 25
 
 
 def _dyn_set(d, tech, par, values, unit=None):
@@ -228,7 +218,7 @@ def _copy_tech(s, d, src, dst, static_changes):
 
 
 def nl_updates(s, d, c, res, par):
-    """Apply the Dutch data (central values of the research report) and add the optional routes."""
+    """Apply the Dutch data and add the optional storage and green-lever routes."""
     d = d.copy()
     # VOM: read the course values as ct/kWh
     vom = d.Parameter == 'VOM'
@@ -241,7 +231,7 @@ def nl_updates(s, d, c, res, par):
     _dyn_set(d, 'SMR CCS', 'CAPEX', [NL_SMR_CCS_CAPEX] * 4)
     _dyn_set(d, 'SMR CCS', 'FOM', [round(0.05 * NL_SMR_CCS_CAPEX, 1)] * 4)
     _dyn_set(d, 'SMR - existing', 'Lifetime', [NL_SMR_EXISTING_LIFETIME] * 4)
-    if ADDITIONS:
+    if STORAGE:
         _dyn_set(d, 'H2 storage', 'CAPEX', NL_H2_STORAGE)
         _dyn_set(d, 'H2 storage', 'FOM', [round(0.02 * x, 4) for x in NL_H2_STORAGE])
         _dyn_set(d, 'H2 storage', 'Lifetime', [45] * 4)
@@ -256,33 +246,12 @@ def nl_updates(s, d, c, res, par):
     else:
         s.loc[len(s)] = {'Technology': 'Battery', 'Parameter': 'Max hours', 'Value': NL_BATTERY_HOURS}
 
-    if ADDITIONS:
-        # ADDITION pure green route: dedicated offshore wind and solar on their own bus, feeding only an electrolyser
-        s, d = _copy_tech(s, d, 'Solar PV', 'Solar PV - dedicated',
-                          {'bus1': 'Dedicated electricity', 'Carrier': 'Solar - dedicated', 'Start year': 2030,
-                           'Long name': 'Solar PV dedicated to electrolysis (no grid connection), addition'})
-        s, d = _copy_tech(s, d, 'Wind turbine - offshore', 'Wind turbine - offshore - dedicated',
-                          {'bus1': 'Dedicated electricity', 'Carrier': 'Wind offshore - dedicated', 'Start year': 2030,
-                           'Long name': 'Offshore wind dedicated to electrolysis (no grid connection), addition'})
-        s, d = _copy_tech(s, d, 'Electrolyser', 'Electrolyser - dedicated',
-                          {'bus0': 'Dedicated electricity',
-                           'Long name': 'Electrolyser on dedicated wind/solar: pure green hydrogen (RFNBO-type), '
-                                        'addition'})
-        # ADDITION pink hydrogen: a dedicated nuclear plant on its own bus, feeding only an electrolyser
-        s, d = _copy_tech(s, d, 'Nuclear plant', 'Nuclear plant - dedicated',
-                          {'bus1': 'Nuclear electricity', 'Start year': 2030,
-                           'Long name': 'Nuclear plant dedicated to electrolysis (pink hydrogen), addition'})
-        s, d = _copy_tech(s, d, 'Electrolyser', 'Electrolyser - nuclear',
-                          {'bus0': 'Nuclear electricity',
-                           'Long name': 'Electrolyser on dedicated nuclear power: pink hydrogen, addition'})
     # LEVER alternative water: an electrolyser on desalinated seawater (grid electricity), outside the verdringingsreeks,
     # so the water scenario does not limit it; the cost of the water is added per scenario (desal_cost_eur_per_kg)
     s, d = _copy_tech(s, d, 'Electrolyser', 'Electrolyser - seawater',
                       {'Long name': 'Electrolyser on desalinated seawater (alternative water, outside the '
                                     'verdringingsreeks), lever'})
     res = res[~res.Resource.isin([r['Resource'] for r in OPTION_RESOURCES])]
-    if ADDITIONS:
-        res = pd.concat([res, pd.DataFrame(OPTION_RESOURCES)], ignore_index=True)
     res = res.reset_index(drop=True)
 
     par = par.copy()
@@ -324,10 +293,10 @@ def main():
     c = pd.read_excel(SRC / 'technologies.xlsx', sheet_name='capacity_constraints')
     for df in (s, d, c):     # the final database uses merged cells: fill the technology name down
         df['Technology'] = df['Technology'].ffill()
-    s_new = pd.DataFrame(STATIC + (STATIC_OPTIONS if ADDITIONS else []),
+    s_new = pd.DataFrame(STATIC + (STATIC_OPTIONS if STORAGE else []),
                          columns=['Technology', 'Parameter', 'Description', 'Efficiency_link', 'Value'])
     s_new['Unit'] = None
-    d_new = pd.DataFrame([(t, p, u, *v) for t, p, u, v in DYNAMIC + (DYNAMIC_OPTIONS if ADDITIONS else [])],
+    d_new = pd.DataFrame([(t, p, u, *v) for t, p, u, v in DYNAMIC + (DYNAMIC_OPTIONS if STORAGE else [])],
                          columns=['Technology', 'Parameter', 'Unit'] + YEARS)
     c_new = pd.DataFrame([(t, ty, u, f, *v) for t, ty, u, f, v in CAPACITY],
                          columns=['Technology', 'Type', 'Unit', 'adjustment factor'] + YEARS)

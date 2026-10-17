@@ -10,12 +10,13 @@
 The water limit is the same in both packages: in MW of hydrogen output, from Base without additions (2,473 MW in
 2050 for Medium). The water available does not change when technologies are added.
 
-Only this flag differs between the two packages; build_h2_database.py, hydrogen.py, run_batch.py, presentation.py,
-the report figures and the notebook read it.
+The published package keeps hydrogen storage as an optional addition. The
+dedicated renewable and nuclear routes are not included here.
 """
 
 ADDITIONS = False
+STORAGE = True
 
 SET_NAME = 'with additions' if ADDITIONS else 'without additions'
 SET_LONG = ('with additions: H₂ storage, pure green and pink hydrogen in every run' if ADDITIONS
-            else 'without additions: SMR, SMR + CCS and the grid electrolyser')
+            else 'without additions: SMR, SMR + CCS, the grid electrolyser and optional H₂ storage')
