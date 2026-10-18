@@ -24,8 +24,14 @@ import warnings
 
 warnings.filterwarnings('ignore')
 from energy_model import model_run, make_scenario
-from energy_model.model import electrolyser_reference
-from scenario_database import snapshot
+from energy_model.h2_scenario import electrolyser_reference
+# from scenario_database import snapshot
+
+try:
+    from scenario_database import snapshot
+except ImportError:
+    snapshot = None
+
 SOLVER = 'gurobi'
 YEARS, T_RES, CARS_CF, RT, RS = [2020, 2030, 2040, 2050], 15, 40 * 0.1, 0.07, 0.01
 DB = 'input_databases//h2_nl'        # final course database plus the H₂ extension
@@ -105,7 +111,9 @@ def run(name, solver=SOLVER, rerun=False, t_res=T_RES):
     path = os.path.join('results', 'runs', f'{name}.nc')
     base, settings = RUNS[name]
     settings = _reference(dict(settings), solver)
-    db = snapshot(DB, name, settings)
+
+    db = snapshot(DB, name, settings) if snapshot is not None else DB
+
     if os.path.exists(path) and not rerun:
         print(f'{name}: already on disk')
         return path

@@ -43,7 +43,7 @@ Danish Energy Agency technology catalogues and the IEA. Per kW of H2 output = pe
 from pathlib import Path
 import pandas as pd
 
-from energy_model.model import STORAGE
+from energy_model.h2_presets import STORAGE
 
 HERE = Path(__file__).parent
 SRC = HERE / 'input_databases' / 'default'      # final course model (calibrated)
