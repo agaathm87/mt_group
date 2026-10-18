@@ -1,3 +1,86 @@
+# Hydrogen Extension
+
+Hydrogen extension of the final course model.
+
+---
+
+## Overview
+
+Hydrogen is modelled as a **demand**, not a secondary resource:
+- `industrial_h2` on the bus `Hydrogen`
+- **1.3 Mt/yr** in every period and scenario *(Elzenga et al., 2025)*
+- Flat hourly profile
+
+---
+
+## End-Use Technologies
+
+Three technologies feed hydrogen demand directly (Links, see `build_h2_database.py`), plus the existing stock:
+
+| Technology | Input | Output |
+|---|---|---|
+| SMR (grey) | Gas supply | Hydrogen + CO₂ atmosphere |
+| SMR CCS (blue) | Gas supply | Hydrogen + CO₂ atmosphere (uncaptured) + CO₂ storage |
+| Electrolyser (green) | Electricity | Hydrogen |
+| SMR - existing | — | Existing reformers in 2020 (course convention) |
+
+---
+
+## Scenarios
+
+Scenarios vary along one dimension: **water availability**. Water itself is not modelled — instead, each scenario constrains how much electrolyser capacity can be built (per vintage):
+
+| Scenario | Water Availability | Electrolyser Capacity Limit |
+|---|---|---|
+| **S1 Base** | No scarcity (100%) | Cost-optimal (reference run) |
+| **S2 Medium** | Medium scarcity | ≤ 50% of S1 capacity per vintage |
+| **S3 Scarce** | High scarcity | No electrolysers (0%) |
+
+Remaining hydrogen demand is met by gas-based hydrogen (grey or blue, whichever is cheaper).
+
+---
+
+## Storage
+
+Optional **salt-cavern storage** on the hydrogen bus *(added by group, 15 Oct)*.
+
+---
+
+## Green Levers *(off by default, 16 Oct)*
+
+Optional sensitivities within each water scenario:
+
+| Lever | Description |
+|---|---|
+| `desal` | Electrolysers on desalinated seawater, outside the water limit, at 0.01–0.03 €/kg extra cost |
+| `h2_production_subsidy` | Subsidy in €/kg of electrolytic hydrogen |
+| `green_mandate` | Minimum share of electrolytic hydrogen per period (RED III-type) |
+
+---
+
+## Module Contents
+
+| Component | Description |
+|---|---|
+| `SCENARIOS`, `SHORT_NAMES` | The three water-availability scenarios |
+| `presets` | Central values and sensitivities: `CO2_PRICES` (ETS1), `CO2_PRICES_ETS2` (household gas & petrol cars, from 2028), `GAS_PRICES`, `ELY_CAPEX`, … |
+| `make_scenario()` | Defines one run = scenario + any sensitivities and data settings |
+| `electrolyser_reference()` | Electrolyser capacity per technology and vintage of a solved S1 run |
+| `apply_scenario_inputs()` | Modifies input data (incl. capacity constraints) before the network is built |
+| `apply_network_settings()` | Sets prices per period, hydrogen demand, and demand path |
+| `make_extra_functionality()` | CO₂-storage cap, build-rate caps, battery cap |
+| `store_shadow_prices()` | Saves shadow prices on the network |
+
+---
+
+## Notes
+
+- Water **use** is reported as an output after solving: `h2_results.water_use`
+- Input data sources and cited values are documented in `presets`
+
+
+----------------
+
 # Final course model with hydrogen (published H2 copy)
 
 This folder contains the final course model for the Netherlands with the
