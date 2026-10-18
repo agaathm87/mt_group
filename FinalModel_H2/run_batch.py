@@ -24,6 +24,7 @@ import warnings
 warnings.filterwarnings('ignore')
 from energy_model import model_run, make_scenario
 from energy_model.model import electrolyser_reference
+from scenario_database import snapshot
 SOLVER = 'gurobi'
 YEARS, T_RES, CARS_CF, RT, RS = [2020, 2030, 2040, 2050], 15, 40 * 0.1, 0.07, 0.01
 DB = 'input_databases//h2_nl'        # final course database plus the H₂ extension
@@ -101,14 +102,15 @@ def _reference(settings, solver):
 
 def run(name, solver=SOLVER, rerun=False, t_res=T_RES):
     path = os.path.join('results', 'runs', f'{name}.nc')
+    base, settings = RUNS[name]
+    settings = _reference(dict(settings), solver)
+    db = snapshot(DB, name, settings)
     if os.path.exists(path) and not rerun:
         print(f'{name}: already on disk')
         return path
-    base, settings = RUNS[name]
-    settings = _reference(dict(settings), solver)
     t = time.time()
     opts = {'Threads': 1, 'TimeLimit': 7200}
-    n = model_run(DB, YEARS, t_res, CARS_CF, RT, RS, solver_name=solver, solver_options=opts,
+    n = model_run(db, YEARS, t_res, CARS_CF, RT, RS, solver_name=solver, solver_options=opts,
                   scenario=make_scenario(base, label=name, **settings),
                   results_dir=os.path.join('results', 'logs'))
     if n.loads_t.p.empty:                      # infeasible or not solved: do not save
