@@ -13,7 +13,9 @@ Each path-type uncertainty (CO2 price, gas price, electrolyser cost, ...) is ONE
 and 1 (high path), so a future never zig-zags between low and high values over time.
 The share of futures in which something happens is not a probability (no distributions are assumed).
 
-    python -m energy_model.ensemble 96 2         # 96 futures x 3 policies, 2 processes (resumable)
+The ensemble runner is optional and is kept separate from the standard
+interface workflow; its functions can be imported from this module when an
+EMA Workbench ensemble is required.
 
 In each future S1 runs first, because the limit of S2 is a share of the electrolyser capacity that S1 builds.
 """
@@ -215,5 +217,4 @@ if __name__ == '__main__':
     procs = int(sys.argv[2]) if len(sys.argv) > 2 else 2
     df = run_ensemble(n, procs)
     print(df.groupby('policy')[['green_share_2050', 'system_cost_bn', 'cum_co2_mt']].describe().T)
-
 
