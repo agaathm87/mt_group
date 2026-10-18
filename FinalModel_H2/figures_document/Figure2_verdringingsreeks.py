@@ -224,9 +224,9 @@ def slide():
 
 
 fig = slide() if MODE == "slide" else apa()
-stem, exts, dpi = {"apa": ("Figure2_verdringingsreeks_APA", ("png", "pdf", "svg"), 300),
-                   "bw": ("Figure2_verdringingsreeks_APA_bw", ("png", "pdf", "svg"), 300),
-                   "slide": ("Figure2_verdringingsreeks_slide", ("png", "svg"), 200)}[MODE]
+stem, exts, dpi = {"apa": ("Figure2_verdringingsreeks_APA", ("png", "pdf", "svg"), 400),
+                   "bw": ("Figure2_verdringingsreeks_APA_bw", ("png", "pdf", "svg"), 400),
+                   "slide": ("Figure2_verdringingsreeks_slide", ("png", "svg"), 400)}[MODE]
 for ext in exts:
     fig.savefig(Path(__file__).with_name(f"{stem}.{ext}"), dpi=dpi, facecolor="white", bbox_inches="tight",
                 pad_inches=0.05)

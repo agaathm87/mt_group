@@ -145,9 +145,9 @@ else:
     text(mid, NY + NH - 4.7, "In each scenario: electrolyser cost or subsidy, CO₂ price (2a–b); batteries (3a–c);", 8.0)
     text(mid, NY + NH - 7.1, "green levers (desalinated water, subsidy per kg of hydrogen, mandate)", 8.0)
 
-stem, exts, dpi = {"apa": ("Figure1_scenario_matrix_APA", ("png", "pdf", "svg"), 300),
-                   "bw": ("Figure1_scenario_matrix_APA_bw", ("png", "pdf", "svg"), 300),
-                   "slide": ("Figure1_scenario_matrix_slide", ("png", "svg"), 200)}[MODE]
+stem, exts, dpi = {"apa": ("Figure1_scenario_matrix_APA", ("png", "pdf", "svg"), 400),
+                   "bw": ("Figure1_scenario_matrix_APA_bw", ("png", "pdf", "svg"), 400),
+                   "slide": ("Figure1_scenario_matrix_slide", ("png", "svg"), 400)}[MODE]
 for ext in exts:
     fig.savefig(Path(__file__).with_name(f"{stem}.{ext}"), dpi=dpi, facecolor="white", bbox_inches="tight",
                 pad_inches=0.05)

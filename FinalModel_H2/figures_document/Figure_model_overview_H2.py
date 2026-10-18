@@ -254,7 +254,7 @@ def draw():
 def save(fig, stem, formats=("png", "pdf", "svg")):
     out = Path(__file__).resolve().parent
     for ext in formats:
-        fig.savefig(out / f"{stem}.{ext}", dpi=300, facecolor="white")
+        fig.savefig(out / f"{stem}.{ext}", dpi=400, facecolor="white")
     print("written", stem)
 
 

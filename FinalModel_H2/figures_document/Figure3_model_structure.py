@@ -168,6 +168,6 @@ if COLOUR:
 
 stem = "Figure3_model_structure_APA" + ("" if COLOUR else "_bw")
 for ext in ("png", "pdf", "svg"):
-    fig.savefig(Path(__file__).with_name(f"{stem}.{ext}"), dpi=300, facecolor="white", bbox_inches="tight",
+    fig.savefig(Path(__file__).with_name(f"{stem}.{ext}"), dpi=400, facecolor="white", bbox_inches="tight",
                 pad_inches=0.05)
 print("saved", stem, "(with additions)" if ADDITIONS else "(without additions)")
