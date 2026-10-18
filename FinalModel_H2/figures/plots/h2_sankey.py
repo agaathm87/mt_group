@@ -3,7 +3,7 @@
 Based on the earlier illustrative script Extra_sankey_scenarios.py (matplotlib only, no extra packages),
 now fed with model output: TWh per year of the representative year of a period.
 
-    from energy_model.h2_sankey import plot_sankeys, plot_sankeys_row
+    from figures.plots.h2_sankey import plot_sankeys, plot_sankeys_row
     fig = plot_sankeys({'Base': n1, 'Medium': n2, 'Scarce': n3}, period=2050)        # panels under each other
     fig = plot_sankeys_row({'Base': n1, 'Medium': n2, 'Scarce': n3}, period=2050)    # side by side (slides)
 """
@@ -245,4 +245,3 @@ def plot_sankeys_row(runs, period=2050, figsize=(13.3, 5.4), fs=1.3, titles=None
                  fontsize=7.2 * fs, style='italic', color=INK2)
     fig.subplots_adjust(left=0.01, right=0.99, top=0.99, bottom=0.06, wspace=0.04)
     return fig
-
