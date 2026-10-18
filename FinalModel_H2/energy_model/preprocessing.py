@@ -133,15 +133,15 @@ def preprocess_technologies(db_dir, years, passenger_cars_cf):
 
     # Cost components are in €/kW or €/kWh, but PyPSA expects them to be in €/MW or €/MWh 
     # --> if column Unit contains '/kW' or '/kWh', multiply the corresponding cost components by 1000
-    techs_d.loc[techs_d['Unit'].str.contains('/kW'), years] *= 1e3
+    techs_d.loc[techs_d['Unit'].str.contains('/kW', na=False), years] *= 1e3
     techs_d['Unit'] = techs_d['Unit'].str.replace('/kW','/MW')
 
     # Transport efficiency is in km/MWh, but PyPSA expects it to be in Mkm/MWh (i.e. million km per MWh)
-    techs_d.loc[techs_d['Unit'].str.contains('km'), years] *= 1e-6
+    techs_d.loc[techs_d['Unit'].str.contains('km', na=False), years] *= 1e-6
     techs_d['Unit'] = techs_d['Unit'].str.replace('km','Mkm')
 
     # Transport capital costs are in €/car, and need to be converted in €/[unit of capacity].
-    techs_d.loc[techs_d['Unit'].str.contains('/car'), years] *= 1e6/passenger_cars_cf
+    techs_d.loc[techs_d['Unit'].str.contains('/car', na=False), years] *= 1e6/passenger_cars_cf
     techs_d['Unit'] = techs_d['Unit'].str.replace('/car','/Mkm/h')
     
     # 4. Read in tech constraints

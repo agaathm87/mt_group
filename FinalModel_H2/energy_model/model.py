@@ -33,9 +33,8 @@ from .preprocessing import (
     int_extrapolate
 )
 
-from .h2_presets import SCENARIOS, DEFAULTS
 from .h2_scenario import make_scenario, apply_scenario_inputs, apply_network_settings
-from .h2_constraints import make_extra_functionality, store_shadow_prices
+from .h2_constraints import make_extra_functionality
 
 # ============================================================
 # MODEL HELPER FUNCTIONS
@@ -96,7 +95,9 @@ def get_cap_constraints(t, years, cn):
     df = df.set_index(['Technology','Type'])
 
     # Fill it with user-defined constraints from the technologies input table
-    df.loc[:,:] = cn.loc[:,:]
+        # Fixing slicing bug 
+    if t in cn.index.get_level_values(0):
+        df.loc[t, :] = cn.loc[t, :]
 
     # The base year is only used to set up fixed capacity bounds, we don't want to extrapolate those to future years.
     # We only want to int/extrapolate if there are user-constraints on max or min cap limits after the base year:

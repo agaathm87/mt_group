@@ -3,7 +3,6 @@
 
 import numpy as np
 import pandas as pd
-import xarray as xr
 
 from .h2_presets import (
     DEFAULTS, SCENARIOS, PRESETS, OPTION_TECHS,
@@ -400,7 +399,9 @@ def apply_network_settings(n, scen, techs_d, resources_pars, years):
     """Settings that act on the built network: prices per period, the use of the hydrogen demand, demand path."""
     ets2 = ets2_price(scen, years)
     overrides = {t: {'CO2 atmosphere': ets2} for t in ETS2_TECHS} if ets2 is not None else None
-    if scen.get('period_prices', False):
+
+    # Fixing default mismatch
+    if scen.get('period_prices', True):
         set_period_prices(n, resources_pars, years, overrides)
     elif ets2 is not None:       # prices of the build year: swap the ETS1 part for the ETS2 price of that year
         co2 = resources_pars[(resources_pars.Resource == 'CO2 atmosphere')
