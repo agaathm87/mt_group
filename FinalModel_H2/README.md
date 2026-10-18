@@ -1,4 +1,4 @@
-# Final course model with hydrogen
+# Final course model with hydrogen (published H2 copy)
 
 This folder contains the final course model for the Netherlands with the
 hydrogen extension. Hydrogen is represented as a fixed industrial demand of
@@ -32,7 +32,10 @@ logic remains in `energy_model/model.py`.
 `input_databases/default` is copied and extended to create
 `input_databases/h2_nl`. The default course database remains untouched.
 Hydrogen demand, Dutch technology costs, efficiencies, lifetimes, and
-emissions are added by `build_h2_database.py`.
+emissions are added by `build_h2_database.py`. This published copy is the
+without-additions H2 model: it does not include dedicated pure-green or pink
+hydrogen routes. Hydrogen storage is retained only where explicitly enabled by
+the published scenario registry.
 
 The canonical `input_databases/h2_nl` remains shared, while the runner creates
 and uses `input_databases/scenarios/<name>/` for every run. Each snapshot
@@ -44,7 +47,7 @@ the fast workflow while making each run's structural input reproducible.
 
 The `run_batch.py` registry changes electrolyser capacity, subsidies and
 CAPEX, infrastructure subsidy, CO2 price, battery cost and duration,
-hydrogen storage, desalinated-water electrolysis, hydrogen production
+hydrogen storage sensitivities, desalinated-water electrolysis, hydrogen production
 subsidy, hydrogen end use, and the green-hydrogen mandate. These are scenario
 settings applied in memory through `make_scenario()` and `model.py`.
 
