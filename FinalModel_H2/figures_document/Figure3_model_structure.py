@@ -31,9 +31,14 @@ def _additions():
 
 
 ADDITIONS = _additions()
+STORAGE_ENABLED = True
+presets = Path(__file__).resolve().parents[1] / "energy_model" / "h2_presets.py"
+if presets.exists():
+    m = re.search(r"^STORAGE = (True|False)", presets.read_text(encoding="utf-8"))
+    STORAGE_ENABLED = bool(m and m.group(1) == "True")
 COLOUR = "--bw" not in sys.argv
 W = 100
-H = 113 if ADDITIONS else 80
+H = 113 if ADDITIONS else (92 if STORAGE_ENABLED else 80)
 fig = plt.figure(figsize=(6.5, 6.5 * H / W))
 ax = fig.add_axes([0, 0, 1, 1])
 ax.set_xlim(0, W)
@@ -100,7 +105,7 @@ for x, w, t in [(C0, BW, "Supply"), (C1, BUSW, "Carrier bus"), (C2, TW, "End-use
 if ADDITIONS:
     Y = dict(ded=83.0, bat=70.5, gen=56.5, ely=56.5, nuc=45.5, smr=28.5, ccs=15.0, gas=22.0, dem=56.0, sto=40.0, fb=43.0)
 else:
-    Y = dict(bat=62.0, gen=48.5, ely=48.5, smr=28.5, ccs=15.0, gas=21.5, dem=26.0, fb=46.0)
+    Y = dict(bat=62.0, gen=48.5, ely=48.5, smr=28.5, ccs=15.0, gas=21.5, dem=26.0, sto=40.0, fb=46.0)
 
 # ---- the water limit: a frame around every electrolyser ----
 FX, FW, FB, FT = C2 - 3.5, TW + 7.0, Y["fb"], H - 6.5
@@ -134,6 +139,9 @@ if ADDITIONS:
     electrolysers = [ely_g, ely, ely_p]
     arrow((ded["r"], ded["cy"]), (ely_g["l"], ded["cy"]))
     arrow((nuc["r"], nuc["cy"]), (ely_p["l"], nuc["cy"]))
+    arrow((sto["cx"], sto["t"]), (dem["cx"], dem["b"]), both=True)
+elif STORAGE_ENABLED:
+    sto = node(C3, Y["sto"], DW, 10.0, "H₂ storage", ["salt caverns (2c)"], "added", "demand")
     arrow((sto["cx"], sto["t"]), (dem["cx"], dem["b"]), both=True)
 
 # ---- arrows ----
