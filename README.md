@@ -163,3 +163,11 @@ Storage is controlled by the `STORAGE` switch near the top of
 | `docs/Dutch hydrogen model input data.md` | Research report: the real input data, ranges and sources. |
 | `figures_document/` | Presentation-ready document diagrams: the model overview, Figure 1 (scenario matrix), Figure 2 (verdringingsreeks), and Figure 3 (model structure), with one PNG output per diagram and the source scripts. |
 | `results/` | Solved runs (`runs/`) and generated plots (`plots/presentation/` for slides, `plots/apa/` for the report). |
+
+To create the hydrogen Sankey frames for 2020, 2030, 2040 and the final 2050
+representative period (the model horizon through 2060), together with a
+looping animation, run from this folder:
+
+```powershell
+python -m figures.plots.presentation --sankey-decades
+```

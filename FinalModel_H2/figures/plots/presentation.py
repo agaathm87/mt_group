@@ -47,7 +47,7 @@ from .h2_plots import (ROUTE_COLORS, ROUTE_HATCH, SCEN_COLORS, INK, INK2, MUTED,
 from .h2_results import (h2_balance, summary, ROUTES, ELECTROLYSIS_ROUTES, cumulative_co2, gas_use, _horizon, subsidy_cost, limit_cost,
                          co2_emissions, co2_stored_by_sector, water_use, electrolyser_investment, ts, _w)
 from .h2_sankey import plot_sankeys_row
-from energy_model.model import CO2_PRICES, CO2_STORAGE_CAPS, WATER_L_PER_KG, ELECTROLYSIS, BATTERY, H2_STORAGE
+from energy_model.h2_presets import CO2_PRICES, CO2_STORAGE_CAPS, WATER_L_PER_KG, ELECTROLYSIS, BATTERY, H2_STORAGE
 ADDITIONS = False
 SET_NAME = 'without additions'
 
@@ -458,6 +458,37 @@ def fig_sankey(R=None, period=2050):
                             titles={k: f'{SCEN_TITLE.get(k, k)} (TWh per year, {period})' for k in R})
     return plot_sankeys_row(R, period, figsize=ST['size'], fs=1.45,
                             titles={k: SCEN_TITLE.get(k, k) for k in R})
+
+
+def save_sankey_decades(R=None, periods=(2020, 2030, 2040, 2050), out=None, duration=1400):
+    """Save one presentation Sankey PNG per model period and a looping GIF of the frames.
+
+    The model's final representative period is stored as 2050 and covers the
+    model horizon through 2060; it remains named 2050 to match the existing
+    result files.
+    """
+    from PIL import Image
+
+    R = R or scenarios()
+    if R is None:
+        return []
+    out = Path(out or OUT_DIR)
+    out.mkdir(parents=True, exist_ok=True)
+    frames = []
+    stems = []
+    for period in periods:
+        fig = fig_sankey(R, period=period)
+        stem = f'P02_h2_sankey_{period}'
+        path = out / f'{stem}.png'
+        save(fig, stem, out=out)
+        frames.append(Image.open(path).convert('P'))
+        stems.append(stem)
+    animation = out / 'P02_h2_sankey_decades.gif'
+    frames[0].save(animation, save_all=True, append_images=frames[1:],
+                   duration=duration, loop=0, optimize=False)
+    for frame in frames:
+        frame.close()
+    return [*stems, animation.stem]
 
 
 # --------------------------------------------------------------------------
@@ -1111,7 +1142,7 @@ def fig_co2storage(R=None, periods=(2030, 2040, 2050)):
 
 def water_by_route(n, period=2050):
     """Water for hydrogen (million m3/yr) by route in one period (litres per kg from hydrogen.WATER_L_PER_KG)."""
-    from energy_model.model import MWH_PER_KG
+    from energy_model.h2_presets import MWH_PER_KG
     b = h2_balance(n).loc[period]
     per = {r: WATER_L_PER_KG['electrolysis'] for r in ROUTES if r not in ('Blue (SMR + CCS)', 'Grey (SMR)')}
     per.update({'Blue (SMR + CCS)': WATER_L_PER_KG['SMR CCS'], 'Grey (SMR)': WATER_L_PER_KG['SMR']})
@@ -1293,7 +1324,7 @@ def lever_table(period=2050):
 def _desal_water(n, period):
     """Water for the electrolysers on desalinated seawater (million m3/yr): not fresh water."""
     from .h2_results import link_output
-    from energy_model.model import ELECTROLYSIS_SEAWATER, MWH_PER_KG
+    from energy_model.h2_presets import ELECTROLYSIS_SEAWATER, MWH_PER_KG
     if not n.links.carrier.isin(ELECTROLYSIS_SEAWATER).any():
         return 0.0
     twh = float(link_output(n, ELECTROLYSIS_SEAWATER).loc[period]) / 1e6
@@ -1685,8 +1716,11 @@ def main(which=None, styles=('slide', 'apa')):
 
 if __name__ == '__main__':
     args = sys.argv[1:]
+    if '--sankey-decades' in args:
+        set_style('slide')
+        print('slide: written', ', '.join(save_sankey_decades()) or '-')
+        raise SystemExit(0)
     styles = ('slide', 'apa')
     if '--slide' in args or '--apa' in args:
         styles = tuple(s for s in ('slide', 'apa') if f'--{s}' in args)
     main([a for a in args if not a.startswith('--')] or None, styles)
-

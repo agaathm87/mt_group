@@ -14,7 +14,7 @@ from matplotlib.path import Path as MPath
 from matplotlib.patches import PathPatch, Rectangle
 
 from .h2_results import _w, link_input, link_output
-from energy_model.model import ELECTROLYSIS_GRID, ELECTROLYSIS_SEAWATER, GREY, BLUE
+from energy_model.h2_presets import ELECTROLYSIS_GRID, ELECTROLYSIS_SEAWATER, GREY, BLUE
 from .h2_plots import ROUTE_COLORS, CARRIER_COLORS, INK, INK2
 
 ELECTROLYSIS_GREEN = []
@@ -245,5 +245,4 @@ def plot_sankeys_row(runs, period=2050, figsize=(13.3, 5.4), fs=1.3, titles=None
                  fontsize=7.2 * fs, style='italic', color=INK2)
     fig.subplots_adjust(left=0.01, right=0.99, top=0.99, bottom=0.06, wspace=0.04)
     return fig
-
 

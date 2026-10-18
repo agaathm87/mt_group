@@ -18,7 +18,7 @@ import matplotlib.pyplot as plt
 
 from .h2_results import (h2_balance, summary, ROUTES, GREEN_ROUTES, co2_emissions, cumulative_co2, ts, subsidy_cost,
                          electricity_mix, gas_use, electrolyser_investment)
-from energy_model.model import ELECTROLYSIS, BATTERY, H2_BUS
+from energy_model.h2_presets import ELECTROLYSIS, BATTERY, H2_BUS
 
 INK, INK2, MUTED, GRID, SURFACE = '#0b0b0b', '#52514e', '#8a8984', '#e6e5e0', '#fcfcfb'
 ROUTE_COLORS = {
@@ -464,5 +464,4 @@ def plot_policy_story(runs, ref, period=2050, title=None, figsize=(15, 3.9)):
                  x=0.01, ha='left', fontweight='bold', fontsize=10.5)
     fig.tight_layout(rect=(0, 0, 1, 0.95))
     return fig
-
 
