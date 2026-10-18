@@ -32,10 +32,6 @@ def _additions():
 
 ADDITIONS = _additions()
 STORAGE_ENABLED = True
-presets = Path(__file__).resolve().parents[1] / "energy_model" / "h2_presets.py"
-if presets.exists():
-    m = re.search(r"^STORAGE = (True|False)", presets.read_text(encoding="utf-8"))
-    STORAGE_ENABLED = bool(m and m.group(1) == "True")
 COLOUR = "--bw" not in sys.argv
 W = 100
 H = 113 if ADDITIONS else (92 if STORAGE_ENABLED else 80)
