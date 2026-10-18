@@ -11,8 +11,9 @@ The three scenarios (meeting with Francesco, 14 Oct; base = 100%, group 15 Oct):
 The model contains SMR, SMR + CCS, grid electrolysis, optional
 hydrogen storage, and the green levers.
 The limits are fixed in MW by the Base run (S1), for every run:
-the water that is available does not change when costs change or technologies are added. The limit is on all
-electrolysers together (MW of hydrogen output per vintage), whatever their power source. All runs use
+the freshwater that is available does not change when costs change or technologies are added. The limit is on
+grid electrolysers together (MW of hydrogen output per vintage). Desalinated-water electrolysis is an alternative
+water lever and is outside this freshwater limit. All runs use
 input_databases/h2_nl.
 """
 import json
@@ -76,7 +77,7 @@ RUNS = {
     'S1_storage_x3': ('S1', dict(h2_storage=True, h2_storage_cost_factor=3.0)),
     'S2_storage_x3': ('S2', dict(ref(), h2_storage=True, h2_storage_cost_factor=3.0)),
     # ---- green levers within the water scenarios (16 Oct) ----
-    # alternative water: electrolysers on desalinated seawater, outside the water limit (0.03 €/kg; x10 = 0.30 €/kg)
+    # alternative water: electrolysers on desalinated seawater, outside the freshwater limit (0.03 €/kg; x10 = 0.30 €/kg)
     'S2_desal': ('S2', dict(ref(), desal=True)), 'S3_desal': ('S3', dict(desal=True)),
     'S3_desal_x10': ('S3', dict(desal=True, desal_cost_eur_per_kg=0.30)),
     # an operating subsidy per kg of electrolytic hydrogen (CfD / H2Global / SDE++-type)

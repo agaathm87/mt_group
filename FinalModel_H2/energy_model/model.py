@@ -856,8 +856,13 @@ def electrolyser_techs(scen):
             + (ELECTROLYSIS_SEAWATER if scen.get('desal') else []))
 
 
+def water_limited_electrolyser_techs(scen):
+    """Electrolysers whose capacity is constrained by freshwater availability."""
+    return ELECTROLYSIS_GRID if scen.get('grid_electrolysis', True) else []
+
+
 def electrolyser_total_cap(scen, years):
-    """{year: MW of hydrogen output} that ALL electrolysers together may add per vintage (scope 'total'), or None."""
+    """{year: MW of H2 output} allowed for freshwater-limited electrolysers."""
     share = scen.get('electrolyser_cap_share')
     if share is None or scen.get('electrolyser_limit_scope', 'total') != 'total':
         return None
@@ -874,20 +879,22 @@ def electrolyser_total_cap(scen, years):
 def electrolyser_caps(scen, years):
     """{technology: {year: MW of hydrogen output}} that the scenario allows per electrolyser vintage, or None.
 
-    The water limit applies to every electrolyser, whatever its power source.
-    * scope 'total' (default): all electrolysers together may be at most the share of the total electrolyser capacity
-      of the reference run (the central S1 run, also for runs with options: the water available does not change with
-      the technology options). Each technology gets that total as its own cap in the capacity constraints; when
-      several electrolysers can be built, make_extra_functionality() adds the joint limit.
-    * scope 'per_technology': each electrolyser may be at most the share of what the reference run (S1 with the same
-      options) builds of it.
+    Freshwater availability limits grid electrolysis. Desalinated-water
+    electrolysis is an alternative-water lever and remains outside this cap.
+    * scope 'total' (default): freshwater-limited electrolysers together may be
+      at most the share of the total electrolyser capacity of the reference run.
+      Each freshwater-limited technology gets that total as its own capacity
+      constraint; when several are enabled, make_extra_functionality() adds the
+      joint limit.
+    * scope 'per_technology': each freshwater-limited electrolyser may be at
+      most the share of what the reference run builds of it.
     """
     share = scen.get('electrolyser_cap_share')
     if share is None:
         return None
     share = float(share)
     ref = _per_tech(scen.get('electrolyser_reference'))
-    techs = electrolyser_techs(scen)
+    techs = water_limited_electrolyser_techs(scen)
     total = electrolyser_total_cap(scen, years)
     if total is not None:
         if share > 0 and not ref:
@@ -945,7 +952,7 @@ def apply_scenario_inputs(techs_s, techs_d, resources_pars, cn, scen, years):
     if not scen.get('grid_electrolysis', True):
         _disable(techs_s, ELECTROLYSIS_GRID)
 
-    # (1) Water availability: the largest electrolyser capacity per vintage, in the capacity constraints
+    # (1) Freshwater availability: the largest grid-electrolyser capacity per vintage.
     limit_on = scen.get('electrolyser_limit_on', 'capacity')
     if limit_on == 'capacity':
         caps = electrolyser_caps(scen, years)
@@ -1257,9 +1264,9 @@ def make_extra_functionality(scen):
                 n.model.add_constraints(_annual_flow(n, ely, y, sns, 'efficiency') >= float(share) * demand,
                                         name=f'Green-mandate-{y}')
 
-        # (1) Water: the joint limit on all electrolysers per vintage (scope 'total', when more than one can be built)
+        # (1) Freshwater: the joint limit on grid electrolysers per vintage.
         total = scen.get('_electrolyser_cap_total_mw_h2') or {}
-        techs = electrolyser_techs(scen)
+        techs = water_limited_electrolyser_techs(scen)
         if total and len(techs) > 1 and scen.get('electrolyser_limit_on', 'capacity') == 'capacity':
             var = n.model['Link-p_nom']
             ext = set(n.links.index[n.links.p_nom_extendable])
