@@ -14,11 +14,11 @@ All energy values are per year of the representative year of each period (TWh/yr
 import numpy as np
 import pandas as pd
 
-from .model import (ELECTROLYSIS, ELECTROLYSIS_GRID, ELECTROLYSIS_SEAWATER,
+from energy_model.model import (ELECTROLYSIS, ELECTROLYSIS_GRID, ELECTROLYSIS_SEAWATER,
                        GREY, BLUE, BATTERY, H2_BUS, H2_LOAD, H2_STORAGE, MWH_PER_KG, WATER_L_PER_KG)
 
 try:
-    from .model import ELECTROLYSIS_GREEN, ELECTROLYSIS_PINK, DEDICATED_RES_CARRIERS, DEDICATED_NUCLEAR
+    from energy_model.model import ELECTROLYSIS_GREEN, ELECTROLYSIS_PINK, DEDICATED_RES_CARRIERS, DEDICATED_NUCLEAR
 except ImportError:
     ELECTROLYSIS_GREEN = []
     ELECTROLYSIS_PINK = []
@@ -463,3 +463,5 @@ def policy_table(runs, ref=None, period=2050):
             df.loc[f'  difference with {ref}: {label.split(" (")[0].split(" 20")[0]}'] = (
                 df.loc[label].astype(float) - float(base))
     return df
+
+
