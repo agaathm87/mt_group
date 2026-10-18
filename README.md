@@ -161,5 +161,5 @@ Storage is controlled by the `STORAGE` switch near the top of
 | `docs/model_notes.md` | What the meetings changed; checks against the final model and the sources; results; suggested report text (written for both packages). |
 | `docs/report_tables_check.md` | What changes in Tables 1–3 of the report. |
 | `docs/Dutch hydrogen model input data.md` | Research report: the real input data, ranges and sources. |
-| `figures_document/` | Presentation-ready document diagrams: the model overview, Figure 1 (scenario matrix), Figure 2 (verdringingsreeks), and Figure 3 (model structure), with one SVG output per diagram and the source scripts. |
+| `figures_document/` | Presentation-ready document diagrams: the model overview, Figure 1 (scenario matrix), Figure 2 (verdringingsreeks), and Figure 3 (model structure), with one PNG output per diagram and the source scripts. |
 | `results/` | Solved runs (`runs/`) and generated plots (`plots/presentation/` for slides, `plots/apa/` for the report). |
