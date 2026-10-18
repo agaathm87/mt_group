@@ -1,6 +1,6 @@
 """Write docs/results_summary.md: the main numbers of THIS package (with or without additions), from its saved runs.
 
-    python -m energy_model.results_summary
+    The interface imports these functions to summarize saved runs.
 """
 from datetime import date
 from pathlib import Path
@@ -82,7 +82,7 @@ def main():
     n_runs = len(list(pres.RUNS_DIR.glob('*.nc')))
     parts = [f'# Results of the package {SET_NAME}',
              '',
-             f'*Written by `python -m energy_model.results_summary` from the {n_runs} runs in `results/runs/` '
+             f'*Written from the {n_runs} runs in `results/runs/` '
              f'({date.today():%d %B %Y}). Package: {SET_LONG}. System costs are discounted over 2020-2059 (the model '
              'objective, with subsidies added back because they are transfers); CO₂ and gas are summed over '
              '2020-2059; "vs central" = against the central run of the same scenario.*',
@@ -126,5 +126,4 @@ if __name__ == '__main__':
     import warnings
     warnings.filterwarnings('ignore')
     main()
-
 

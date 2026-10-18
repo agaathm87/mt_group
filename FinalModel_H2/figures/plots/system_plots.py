@@ -16,7 +16,8 @@ Colours (validated with the dataviz palette checker for the stacking orders used
   carriers  electricity #eda100, hydrogen #1baf7a
   CCS variants use the colour of their fuel with a hatch, so CCS is not shown by colour alone.
 
-Run `python -m energy_model.system_plots` to draw plots for the saved main runs into results/plots.
+The interface calls `main()` to draw plots for the saved main runs into
+`results/plots`.
 """
 
 import numpy as np
@@ -510,5 +511,4 @@ if __name__ == '__main__':
     import warnings
     warnings.filterwarnings('ignore')
     main()
-
 

@@ -1,7 +1,7 @@
 """Figures for the presentation (16:9 slides), drawn from the saved runs in results/runs.
 
-    python -m energy_model.presentation                  # every figure whose runs are on disk
-    python -m energy_model.presentation routes sankey    # only these figures (names in FIGURES below)
+    The interface calls `main()` for every figure whose runs are on disk, or
+    passes selected figure names from `FIGURES`.
 
 Each figure is sized for the content box of the group's slide template (16:9, 11.5 x 4.76 inches under the title;
 fonts of 10.5 pt or more at that size) and saved as PNG (200 dpi) and SVG in results/plots/presentation. Colours as in h2_plots: the colour of the hydrogen (green, pure
@@ -29,7 +29,7 @@ Storyline, one figure per slide (Table 2 of the report gives the plot for each p
   P16 levers       green levers within the water scenarios (desalinated water, production subsidy, mandate): heat table
   P16b levers_co2  each lever: system cost against CO2, both against the same scenario without it
 
-    python -m energy_model.presentation --apa            # the same figures for the report (APA, results/plots/apa)
+    The interface can request the report style with `styles=('apa',)`.
 """
 
 import sys
@@ -1689,5 +1689,4 @@ if __name__ == '__main__':
     if '--slide' in args or '--apa' in args:
         styles = tuple(s for s in ('slide', 'apa') if f'--{s}' in args)
     main([a for a in args if not a.startswith('--')] or None, styles)
-
 
