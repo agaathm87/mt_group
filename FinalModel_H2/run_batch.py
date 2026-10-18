@@ -31,7 +31,6 @@ try:
     from scenario_database import snapshot
 except ImportError:
     snapshot = None
-
 SOLVER = 'gurobi'
 YEARS, T_RES, CARS_CF, RT, RS = [2020, 2030, 2040, 2050], 15, 40 * 0.1, 0.07, 0.01
 DB = 'input_databases//h2_nl'        # final course database plus the H₂ extension

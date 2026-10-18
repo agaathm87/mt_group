@@ -1,10 +1,10 @@
 # Energy transition model with hydrogen
 by *Agaath de Vries​, Māra Učelniece​, and Josefina Rodríguez Zuloaga​*
 
-This folder contains an energy transition model with a hydrogen extension. Hydrogen is represented as a fixed industrial demand of 1.3 Mt per year, served by grey hydrogen, blue hydrogen, and grid electrolysis. The 2020 reformers are represented as existing capacity.
-
-
-
+This folder contains an energy transition model with a hydrogen extension.
+Hydrogen is represented as a fixed industrial demand of 1.3 Mt per year,
+served by grey hydrogen, blue hydrogen, and grid electrolysis. The 2020
+reformers are represented as existing capacity.
 
 - **Hydrogen is a demand.** It is 1.3 Mt/yr for refineries and ammonia (Elzenga et al., 2025), the same in every period and scenario and flat over the hours.
 - **Three end-use technologies** feed that demand directly:
@@ -29,18 +29,19 @@ This folder contains an energy transition model with a hydrogen extension. Hydro
 
 ## Quick start
 ```bash
-pip install pypsa==1.3.0 highspy openpyxl matplotlib       # gurobipy if you use Gurobi
+pip install pypsa==1.3.0 openpyxl matplotlib gurobipy
 python build_h2_database.py                  # (re)builds input_databases/h2_nl from the final course database
 python run_batch.py S1 S2 S3                 # the three scenarios (S1 first: it sets the water of S2)
-python run_batch.py                          # all 30 runs of this package (the 60% mandate in Medium is infeasible)
+python run_batch.py                          # all 40 configured runs (S2_mandate is infeasible by design)
 ```
 For the normal workflow, open `interface.ipynb` and run its cells from top to
 bottom. Set `RUN_ALL_SCENARIOS = True` to solve the configured registry and
 set `RUN_ALL_FIGURES = True` to generate plots through the interface. The
 plots are written to `results/plots/presentation/`, `results/plots/apa/`, and
 `results/plots/` for system plots.
-`run_batch.py` uses HiGHS (free) by default; `SOLVER=gurobi python run_batch.py ...` uses the course solver.
-- A run takes 2–6 minutes with HiGHS (15-hour steps). Two runs can go in parallel (one thread each).
+The published workflow uses Gurobi. A valid Gurobi license is required.
+The model uses 15-hour representative steps; two independent runs can go in
+parallel when each is configured to use one solver thread.
 - All runs are saved in `results/runs/`, so the notebook and the figure scripts load them without solving.
 - `docs/results_summary.md` has the main numbers of this package, written from the runs.
 
@@ -72,10 +73,11 @@ The interface is the user-facing workflow: it runs scenarios through
 `build_h2_database.py`
 creates a package-local hydrogen bus and the fixed `industrial_h2` demand,
 then adds `SMR`, `SMR CCS`, `Electrolyser`, and the calibrated
-`SMR - existing` link. The additions variant extends this further with
-hydrogen storage, dedicated renewable electrolysis, and pink electrolysis.
-These are database topology changes; the optimisation routine remains the
-same generic PyPSA model in `energy_model/model.py`.
+`SMR - existing` link. This package also retains optional hydrogen storage;
+the additions variant extends the hydrogen topology further with dedicated
+renewable electrolysis and pink electrolysis. These are database topology
+changes; the optimisation routine remains the same generic PyPSA model in
+`energy_model/model.py`.
 
 ### Data obtained and changed
 
@@ -84,8 +86,9 @@ same generic PyPSA model in `energy_model/model.py`.
 Hydrogen demand, Dutch technology costs, efficiencies, lifetimes, and
 emissions are added by `build_h2_database.py`. This published copy is the
 without-additions H2 model: it does not include dedicated pure-green or pink
-hydrogen routes. Hydrogen storage is retained only where explicitly enabled by
-the published scenario registry.
+hydrogen routes. Hydrogen storage is available as an optional H2 technology
+and is enabled by the default settings; individual scenarios can disable it
+with `h2_storage=False`.
 
 The canonical `input_databases/h2_nl` remains shared, while the runner creates
 and uses `input_databases/scenarios/<name>/` for every run. Each snapshot
@@ -99,7 +102,8 @@ The `run_batch.py` registry changes electrolyser capacity, subsidies and
 CAPEX, infrastructure subsidy, CO2 price, battery cost and duration,
 hydrogen storage sensitivities, desalinated-water electrolysis, hydrogen production
 subsidy, hydrogen end use, and the green-hydrogen mandate. These are scenario
-settings applied in memory through `make_scenario()` and `model.py`.
+settings applied in memory through `make_scenario()` and the H2 scenario
+modules.
 
 ### Key model outputs and results
 
@@ -112,13 +116,15 @@ CO2, gas use, electricity mix, water use, storage, and policy indicators.
 
 ### Main files
 
-- `energy_model/model.py`: course model and H₂ integration.
-- `energy_model/model.py`: scenarios, green levers, storage, prices, and constraints.
+- `energy_model/model.py`: course-model construction and optimization.
+- `energy_model/h2_presets.py`: H₂ constants, price paths, defaults, and scenario presets.
+- `energy_model/h2_scenario.py`: scenario settings and input changes.
+- `energy_model/h2_constraints.py`: additional H₂, water, storage, and capacity constraints.
 - `figures/plots/h2_results.py`: result calculations.
 - `build_h2_database.py`: builds `input_databases/h2_nl`.
 - `figures/plots/`: analysis and plotting modules used by the interface.
 - `results/plots/`: generated slide, report, and system plots.
-- `run_batch.py`: Gurobi batch runner.
+- `run_batch.py`: scenario registry and batch runner.
 - `interface.ipynb`: interactive model interface.
 - `results/solver_run.log`: example solver log.
 
@@ -134,7 +140,7 @@ The optional experiments retained in this package are:
 - `h2_storage_cost_factor`: storage-cost sensitivity.
 
 Storage is controlled by the `STORAGE` switch near the top of
-`energy_model/model.py`. Individual runs can override it with
+`energy_model/h2_presets.py`. Individual runs can override it with
 `h2_storage=True` or `h2_storage=False`. The selected runs are defined in
 `run_batch.py`.
 
@@ -142,16 +148,15 @@ Storage is controlled by the `STORAGE` switch near the top of
 | File | Content |
 |---|---|
 | `interface.ipynb` | **Main notebook**: the course interface (settings, course plots, check against the course model) plus the hydrogen study of this package: the database, the scenarios, the policy story, Sankeys, the variations, the green levers and the figures. `html/interface.html` is the executed notebook. |
-| `energy_model/model.py`, `preprocessing.py` | Final course model; our changes are marked `# [H2]`. |
-| `energy_model/model.py` | Scenarios (electrolyser capacity limits), additions, levers, real data (central values are the defaults), cost variations, prices per period, extra constraints. |
+| `energy_model/model.py`, `preprocessing.py` | Final course model and data preprocessing. |
+| `energy_model/h2_presets.py`, `h2_scenario.py`, `h2_constraints.py` | Hydrogen defaults, scenario input changes, and additional constraints. |
 | `figures/plots/h2_results.py`, `h2_plots.py`, `h2_sankey.py` | Output tables (incl. `policy_table`, `economic_cost`), plots, hydrogen Sankey diagrams. |
 | `figures/plots/presentation.py` | **The figures for the slides and the report**: slide style (the template's content box) and APA style (6.5 inches wide, text 8 pt or more), all in colour. Also the tables `Table_key_numbers` and `Table_green_levers` next to the APA figures. |
 | `figures/plots/system_plots.py` | Whole-system plots and the course's quick plots. |
-| `figures/plots/ensemble.py`, `ensemble_analysis.py` | Scenario ensemble (EMA Workbench); not rerun. |
 | `input_databases/default` | The final course database, untouched. |
 | `input_databases/h2_nl` | Canonical hydrogen database of this package. |
 | `input_databases/scenarios/<name>` | Run-specific database snapshot and scenario manifest. |
-| `run_batch.py` | The runs of this package (30 that solve, plus the 60% mandate in Medium, which is infeasible) and a cached runner. |
+| `run_batch.py` | The 40 configured runs, including the intentionally infeasible `S2_mandate`, and the cached runner. |
 | `docs/results_summary.md` | The main numbers of this package, written from its runs. |
 | `docs/model_notes.md` | What the meetings changed; checks against the final model and the sources; results; suggested report text (written for both packages). |
 | `docs/report_tables_check.md` | What changes in Tables 1–3 of the report. |
