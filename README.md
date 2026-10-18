@@ -1,10 +1,7 @@
 # Energy transition model with hydrogen
+by *Agaath de Vries​, Māra Učelniece​, and Josefina Rodríguez Zuloaga​*
 
-# KEEP 
-
-This folder contains an energy transition model with a hydrogen extension. Hydrogen is represented as a fixed industrial demand of
-1.3 Mt per year, served by grey hydrogen, blue hydrogen, and grid electrolysis.
-The 2020 reformers are represented as existing capacity.
+This folder contains an energy transition model with a hydrogen extension. Hydrogen is represented as a fixed industrial demand of 1.3 Mt per year, served by grey hydrogen, blue hydrogen, and grid electrolysis. The 2020 reformers are represented as existing capacity.
 
 
 
@@ -14,20 +11,18 @@ The 2020 reformers are represented as existing capacity.
   - SMR (grey): gas → hydrogen + CO₂ to the air;
   - SMR + CCS (blue): gas → hydrogen + a little CO₂ to the air + CO₂ stored (the storage is capped);
   - electrolyser (green): grid electricity → hydrogen.
-
   The reformers that exist in 2020 are the 2020 stock.
-- **Water is not modelled.** The scenarios limit how much **electrolyser capacity** can be built, in the capacity constraints of the technology table. **The base is the scenario without water scarcity.**
 
-- 
+- **Water is not modelled.** The scenarios limit how much **electrolyser capacity** can be built, in the capacity constraints of the technology table. **The base is the scenario without water scarcity.**
 
 - **Green levers, off by default**: electrolysers on desalinated seawater, outside the water limit (`desal`); a production subsidy per kg of electrolytic hydrogen (`h2_production_subsidy`); a minimum share of electrolytic hydrogen (`green_mandate`).
 - **Real Dutch input data** are the default (research report *Dutch hydrogen model input data*). All money values are in 2024 euros.
 
 | Scenario | Short name | Meaning |
-|---|---|---|---|
+|---|---|---|
 | S1 | **Base** | No electrolyser capacity limit |
 | S2 | **Medium** | Electrolyser capacity capped at 50% of the S1 reference  |
-| S3 | **Scarce** | high: electrolysis is ordinary industry (category 4) | No electrolyser capacity |
+| S3 | **Scarce** | No electrolyser capacity |
 
 
 
