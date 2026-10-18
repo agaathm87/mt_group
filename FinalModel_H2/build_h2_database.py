@@ -22,7 +22,7 @@ The set-up (meeting with Francesco, 14 October):
     unless a run switches it on (desal=True).
   * Not in the model: hydrogen as a secondary resource, the hydrogen furnace (option A) and hydrogen imports.
   * Water is not a resource in the model. The scenarios limit the electrolyser capacity instead (capacity
-    constraints, set per scenario by energy_model/hydrogen.py).
+    constraints, set per scenario by energy_model/model.py).
 
 Run:  python build_h2_database.py
 Edit the numbers in the HYDROGEN EXTENSION and DUTCH DATA sections below and run again to regenerate the database.
@@ -43,7 +43,7 @@ Danish Energy Agency technology catalogues and the IEA. Per kW of H2 output = pe
 from pathlib import Path
 import pandas as pd
 
-from energy_model.hydrogen import STORAGE
+from energy_model.model import STORAGE
 
 HERE = Path(__file__).parent
 SRC = HERE / 'input_databases' / 'default'      # final course model (calibrated)
@@ -138,7 +138,7 @@ DYNAMIC = [
 
 # Capacity constraints (in MW of output, per vintage as in the course model):
 # no NEW SMR in the base year, only the existing stock. The electrolyser rows that make the scenarios
-# (Medium, Scarce) are written per scenario by energy_model/hydrogen.py (Medium depends on the Base run).
+# (Medium, Scarce) are written per scenario by energy_model/model.py (Medium depends on the Base run).
 CAPACITY = [
     ('SMR', 'max', 'MW', None, [0, None, None, None]),
     ('SMR', 'min', 'MW', None, [0, None, None, None]),
@@ -171,7 +171,7 @@ REMOVED_RESOURCES = ['Hydrogen']
 
 # ============================================================
 # DUTCH DATA (input_databases/h2_nl) - selected central values, in 2024 euros
-# Price bases converted with the Dutch HICP (Eurostat/CBS): nominal 2020 x 1.2325, €2025 / 1.030 (see hydrogen.py)
+# Price bases converted with the Dutch HICP (Eurostat/CBS): nominal 2020 x 1.2325, €2025 / 1.030 (see model.py)
 # ============================================================
 E2020, E2025 = 1.028 * 1.116 * 1.041 * 1.032, 1 / 1.030   # -> €2024
 NL_VOM_FACTOR = 0.01        # course VOMs are read as ct/kWh: CCGT 2 €/MWh, wind 1, PV 0.5 (PyPSA technology-data/DEA)

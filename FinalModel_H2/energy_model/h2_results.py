@@ -14,11 +14,11 @@ All energy values are per year of the representative year of each period (TWh/yr
 import numpy as np
 import pandas as pd
 
-from .hydrogen import (ELECTROLYSIS, ELECTROLYSIS_GRID, ELECTROLYSIS_SEAWATER,
+from .model import (ELECTROLYSIS, ELECTROLYSIS_GRID, ELECTROLYSIS_SEAWATER,
                        GREY, BLUE, BATTERY, H2_BUS, H2_LOAD, H2_STORAGE, MWH_PER_KG, WATER_L_PER_KG)
 
 try:
-    from .hydrogen import ELECTROLYSIS_GREEN, ELECTROLYSIS_PINK, DEDICATED_RES_CARRIERS, DEDICATED_NUCLEAR
+    from .model import ELECTROLYSIS_GREEN, ELECTROLYSIS_PINK, DEDICATED_RES_CARRIERS, DEDICATED_NUCLEAR
 except ImportError:
     ELECTROLYSIS_GREEN = []
     ELECTROLYSIS_PINK = []
@@ -259,7 +259,7 @@ def renewable_curtailment(n, carriers=('Solar', 'Wind onshore', 'Wind offshore')
 
 
 def water_use(n):
-    """Water use for hydrogen production (million m3/yr), with WATER_L_PER_KG from hydrogen.py (output only)."""
+    """Water use for hydrogen production (million m3/yr), with WATER_L_PER_KG from model.py (output only)."""
     b = h2_balance(n)
     kg = lambda twh: twh * 1e6 / MWH_PER_KG
     m3 = (kg(b[ELECTROLYSIS_ROUTES].sum(axis=1)) * WATER_L_PER_KG['electrolysis']

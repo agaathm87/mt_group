@@ -7,5 +7,5 @@
 ###
 
 from .model import model_run
-from .hydrogen import make_scenario, SCENARIOS, CO2_PRICES   # [H2]
+from .model import make_scenario, SCENARIOS, CO2_PRICES   # [H2]
 __all__ = ["model_run", "make_scenario", "SCENARIOS", "CO2_PRICES"]

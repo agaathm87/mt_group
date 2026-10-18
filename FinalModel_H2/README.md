@@ -41,16 +41,17 @@ The optional experiments retained in this package are:
 - `h2_storage_cost_factor`: storage-cost sensitivity.
 
 Storage is controlled by the `STORAGE` switch near the top of
-`energy_model/hydrogen.py`. Individual runs can override it with
+`energy_model/model.py`. Individual runs can override it with
 `h2_storage=True` or `h2_storage=False`. The selected runs are defined in
 `run_batch.py`.
 
 ## Main files
 
 - `energy_model/model.py`: course model and H₂ integration.
-- `energy_model/hydrogen.py`: scenarios, green levers, storage, prices, and constraints.
+- `energy_model/model.py`: scenarios, green levers, storage, prices, and constraints.
 - `energy_model/h2_results.py`: result calculations.
 - `build_h2_database.py`: builds `input_databases/h2_nl`.
 - `run_batch.py`: Gurobi batch runner.
 - `interface.ipynb`: interactive model interface.
 - `results/solver_run.log`: example solver log.
+
