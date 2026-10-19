@@ -105,6 +105,7 @@ def _additions():
 
 
 ADDITIONS = _additions()
+STORAGE_ENABLED = True
 
 
 # ---------------------------------------------------------------- the figure
@@ -126,8 +127,8 @@ def draw():
     chip(ax, 600, 64, 320, 30, "CO₂ (ETS1, ETS2) and gas prices per period")
     chip(ax, 930, 64, 280, 30, "Caps: CO₂ storage, build rates")
     chip(ax, 30, 102, 560, 30, "(2a) Electrolyser cost or subsidy · (2b) CO₂ price paths")
-    chip(ax, 600, 102, 610, 30, "(2c) H₂ storage cost · (3a–c) Battery cost, power and duration" if ADDITIONS
-         else "(3a–c) Battery cost, power and duration · green levers")
+    chip(ax, 600, 102, 610, 30, "(2c) H₂ storage cost · (3a–c) Battery cost, power and duration"
+         if STORAGE_ENABLED else "(3a–c) Battery cost, power and duration · green levers")
 
     # --- emissions
     box(ax, 400, 154, 380, 68, C["emis"])
@@ -214,10 +215,10 @@ def draw():
     text(ax, 507.5, 693, "Batteries", ha="center")
     box(ax, 448, 710, 120, 22, C["store"], r=3)
     text(ax, 507.5, 725, "Electricity storage", 11, "medium", C["store_t"], ha="center")
-    # hydrogen storage (addition, 2c): on the hydrogen balance, next to the industrial hydrogen demand
-    if ADDITIONS:
+    # hydrogen storage (2c): on the hydrogen balance, next to the industrial hydrogen demand
+    if STORAGE_ENABLED:
         box(ax, 948, 540, 214, 44, C["h2_fill"], C["h2"], 1.3, DASH, r=6, z=2)
-        text(ax, 960, 559, "H₂ storage (addition)", 12, "bold", C["h2"])
+        text(ax, 960, 559, "H₂ storage", 12, "bold", C["h2"])
         text(ax, 960, 577, "salt caverns", 11.0, "medium", C["h2"])
         line(ax, [(1040, 539), (1040, 489)], C["h2"], 1.7, ls=DASH, start=True, size=10)
 
@@ -254,7 +255,7 @@ def draw():
 def save(fig, stem, formats=("png", "pdf", "svg")):
     out = Path(__file__).resolve().parent
     for ext in formats:
-        fig.savefig(out / f"{stem}.{ext}", dpi=300, facecolor="white")
+        fig.savefig(out / f"{stem}.{ext}", dpi=400, facecolor="white")
     print("written", stem)
 
 
